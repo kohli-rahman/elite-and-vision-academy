@@ -49,9 +49,9 @@ const ProgramDetails = () => {
       title: 'Test Preparation Program',
       description: 'Our Test Preparation Program offers intensive coaching for standardized tests, with practice sessions and performance analytics to ensure you achieve your target score.',
       longDescription: [
-        'Excellence Academy's Test Preparation Program is specifically designed to help students excel in standardized tests and entrance exams. We understand the importance of these tests in determining academic and career opportunities, and our program provides comprehensive preparation to maximize your performance.',
-        'Our approach combines content review, test-taking strategies, and extensive practice to build both knowledge and confidence. We focus on understanding the format and requirements of specific tests, identifying the most effective approaches for different question types, and developing time management skills crucial for test success.',
-        'Each student receives a customized study plan based on their initial assessment, with regular practice tests to track progress and pinpoint areas needing additional focus. Our instructors provide detailed feedback and strategies for improvement, ensuring that you continually enhance your performance leading up to the actual test.'
+        "Excellence Academy's Test Preparation Program is specifically designed to help students excel in standardized tests and entrance exams. We understand the importance of these tests in determining academic and career opportunities, and our program provides comprehensive preparation to maximize your performance.",
+        "Our approach combines content review, test-taking strategies, and extensive practice to build both knowledge and confidence. We focus on understanding the format and requirements of specific tests, identifying the most effective approaches for different question types, and developing time management skills crucial for test success.",
+        "Each student receives a customized study plan based on their initial assessment, with regular practice tests to track progress and pinpoint areas needing additional focus. Our instructors provide detailed feedback and strategies for improvement, ensuring that you continually enhance your performance leading up to the actual test."
       ],
       duration: '8 Weeks',
       sessions: '24 Sessions (3 per week)',
@@ -81,9 +81,9 @@ const ProgramDetails = () => {
       title: 'Career Development Program',
       description: 'Our Career Development Program provides guidance and skill enhancement to prepare students for the professional world, with personalized coaching and practical exercises.',
       longDescription: [
-        'The Career Development Program at Excellence Academy is designed to bridge the gap between academics and professional success. In today's competitive job market, academic qualifications alone are often not enough – employers look for candidates with well-rounded skills, practical experience, and professional polish.',
-        'Our program focuses on developing the essential skills needed for career success, including communication, leadership, problem-solving, and technological proficiency. We provide guidance on career path selection, resume building, interview preparation, and professional networking, helping students make informed decisions about their future.',
-        'Through a combination of one-on-one coaching, workshops, and practical exercises, we help students identify their strengths and interests, set meaningful career goals, and develop strategies to achieve them. Industry exposure and interactions with professionals provide valuable insights and opportunities for real-world learning.'
+        "The Career Development Program at Excellence Academy is designed to bridge the gap between academics and professional success. In today's competitive job market, academic qualifications alone are often not enough – employers look for candidates with well-rounded skills, practical experience, and professional polish.",
+        "Our program focuses on developing the essential skills needed for career success, including communication, leadership, problem-solving, and technological proficiency. We provide guidance on career path selection, resume building, interview preparation, and professional networking, helping students make informed decisions about their future.",
+        "Through a combination of one-on-one coaching, workshops, and practical exercises, we help students identify their strengths and interests, set meaningful career goals, and develop strategies to achieve them. Industry exposure and interactions with professionals provide valuable insights and opportunities for real-world learning."
       ],
       duration: '16 Weeks',
       sessions: '16 Sessions (1 per week)',

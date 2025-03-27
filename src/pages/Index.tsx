@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, BookOpen, Users, Star, Award, MapPin, Phone, Mail } from 'lucide-react';
@@ -68,7 +67,7 @@ const Index = () => {
       name: 'Aditya Sharma',
       role: 'IIT Delhi Student',
       image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1287&q=80',
-      testimonial: 'The JEE coaching I received at Apex Academy was exceptional. The faculty's approach to complex topics and regular mock tests helped me secure a top rank.',
+      testimonial: "The JEE coaching I received at Apex Academy was exceptional. The faculty's approach to complex topics and regular mock tests helped me secure a top rank.",
       rating: 5,
     },
     {
@@ -76,7 +75,7 @@ const Index = () => {
       name: 'Priya Patel',
       role: 'NEET Qualifier',
       image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1288&q=80',
-      testimonial: 'The NEET preparation program at Apex Academy gave me a structured approach to study. The biology sessions were particularly helpful in building my foundation.',
+      testimonial: "The NEET preparation program at Apex Academy gave me a structured approach to study. The biology sessions were particularly helpful in building my foundation.",
       rating: 5,
     },
     {
@@ -84,7 +83,7 @@ const Index = () => {
       name: 'Raj Kumar',
       role: 'NTSE Scholar',
       image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1287&q=80',
-      testimonial: 'The NTSE coaching program was comprehensive and well-structured. The faculty's guidance helped me crack the exam with a good score.',
+      testimonial: "The NTSE coaching program was comprehensive and well-structured. The faculty's guidance helped me crack the exam with a good score.",
       rating: 4,
     },
   ];

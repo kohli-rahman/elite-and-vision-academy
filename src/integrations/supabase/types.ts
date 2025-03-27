@@ -72,6 +72,172 @@ export type Database = {
         }
         Relationships: []
       }
+      test_answers: {
+        Row: {
+          attempt_id: string
+          created_at: string
+          id: string
+          is_correct: boolean | null
+          question_id: string
+          student_answer: string | null
+        }
+        Insert: {
+          attempt_id: string
+          created_at?: string
+          id?: string
+          is_correct?: boolean | null
+          question_id: string
+          student_answer?: string | null
+        }
+        Update: {
+          attempt_id?: string
+          created_at?: string
+          id?: string
+          is_correct?: boolean | null
+          question_id?: string
+          student_answer?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "test_answers_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "test_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "test_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "test_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      test_attempts: {
+        Row: {
+          created_at: string
+          end_time: string | null
+          id: string
+          score: number | null
+          start_time: string
+          status: string
+          student_id: string
+          test_id: string
+          total_possible: number | null
+        }
+        Insert: {
+          created_at?: string
+          end_time?: string | null
+          id?: string
+          score?: number | null
+          start_time?: string
+          status?: string
+          student_id: string
+          test_id: string
+          total_possible?: number | null
+        }
+        Update: {
+          created_at?: string
+          end_time?: string | null
+          id?: string
+          score?: number | null
+          start_time?: string
+          status?: string
+          student_id?: string
+          test_id?: string
+          total_possible?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "test_attempts_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      test_questions: {
+        Row: {
+          correct_answer: string
+          created_at: string
+          id: string
+          marks: number
+          options: Json | null
+          question_text: string
+          question_type: string
+          test_id: string
+        }
+        Insert: {
+          correct_answer: string
+          created_at?: string
+          id?: string
+          marks?: number
+          options?: Json | null
+          question_text: string
+          question_type: string
+          test_id: string
+        }
+        Update: {
+          correct_answer?: string
+          created_at?: string
+          id?: string
+          marks?: number
+          options?: Json | null
+          question_text?: string
+          question_type?: string
+          test_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "test_questions_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tests: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          duration: number
+          id: string
+          is_published: boolean
+          passing_percent: number
+          subject: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          duration: number
+          id?: string
+          is_published?: boolean
+          passing_percent?: number
+          subject: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          duration?: number
+          id?: string
+          is_published?: boolean
+          passing_percent?: number
+          subject?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

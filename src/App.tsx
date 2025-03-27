@@ -11,6 +11,11 @@ import About from "./pages/About";
 import ProgramDetails from "./pages/ProgramDetails";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import Tests from "./pages/Tests";
+import TestCreate from "./pages/TestCreate";
+import TestEdit from "./pages/TestEdit";
+import TestAttempt from "./pages/TestAttempt";
+import TestResults from "./pages/TestResults";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +32,11 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/programs/:id" element={<ProgramDetails />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/tests" element={<Tests />} />
+            <Route path="/tests/create" element={<TestCreate />} />
+            <Route path="/tests/:id/edit" element={<TestEdit />} />
+            <Route path="/tests/:id/attempt" element={<TestAttempt />} />
+            <Route path="/tests/:id/results" element={<TestResults />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

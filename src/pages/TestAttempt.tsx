@@ -1,10 +1,10 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { ClockIcon, ChevronRight, ChevronLeft, AlertTriangle, CheckCircle2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
+import { Json } from '@/integrations/supabase/types';
 
 type Question = {
   id: string;
@@ -74,7 +74,6 @@ const TestAttempt = () => {
       if (!id || !attemptId || !user) return;
 
       try {
-        // First, get the attempt to verify it belongs to the user
         const { data: attemptData, error: attemptError } = await supabase
           .from('test_attempts')
           .select('*')
@@ -101,7 +100,6 @@ const TestAttempt = () => {
 
         setAttempt(attemptData);
 
-        // Get the test details
         const { data: testData, error: testError } = await supabase
           .from('tests')
           .select('*')
@@ -111,7 +109,6 @@ const TestAttempt = () => {
         if (testError) throw testError;
         setTest(testData);
 
-        // Get the questions
         const { data: questionsData, error: questionsError } = await supabase
           .from('test_questions')
           .select('*')
@@ -119,16 +116,25 @@ const TestAttempt = () => {
           .order('created_at', { ascending: true });
 
         if (questionsError) throw questionsError;
-        setQuestions(questionsData);
+        
+        const formattedQuestions: Question[] = questionsData.map((q: any) => ({
+          id: q.id,
+          question_text: q.question_text,
+          question_type: q.question_type,
+          options: q.options ? 
+            (Array.isArray(q.options) ? q.options : JSON.parse(q.options)) : 
+            null,
+          marks: q.marks,
+        }));
+        
+        setQuestions(formattedQuestions);
 
-        // Initialize answers array
         const initialAnswers = questionsData.map((q: any) => ({
           questionId: q.id,
           answer: null,
         }));
         setAnswers(initialAnswers);
 
-        // Check for existing answers
         const { data: existingAnswers, error: answersError } = await supabase
           .from('test_answers')
           .select('question_id, student_answer')
@@ -146,7 +152,6 @@ const TestAttempt = () => {
           setAnswers(updatedAnswers);
         }
 
-        // Calculate time left
         if (testData && attemptData) {
           const startTime = new Date(attemptData.start_time).getTime();
           const durationMs = testData.duration * 60 * 1000;
@@ -155,7 +160,6 @@ const TestAttempt = () => {
           const remainingMs = endTime - now;
           
           if (remainingMs <= 0) {
-            // Time's up, submit the test
             submitTest(true);
           } else {
             setTimeLeft(Math.floor(remainingMs / 1000));
@@ -173,7 +177,6 @@ const TestAttempt = () => {
   }, [id, attemptId, user, navigate]);
 
   useEffect(() => {
-    // Start the timer
     if (timeLeft !== null && timeLeft > 0) {
       timerRef.current = setInterval(() => {
         setTimeLeft(prev => {
@@ -196,14 +199,12 @@ const TestAttempt = () => {
     if (!attemptId) return;
 
     try {
-      // Update local state
       setAnswers(prev => 
         prev.map(a => 
           a.questionId === questionId ? { ...a, answer } : a
         )
       );
 
-      // Check if an answer already exists
       const { data: existingAnswer } = await supabase
         .from('test_answers')
         .select('id')
@@ -212,13 +213,11 @@ const TestAttempt = () => {
         .single();
 
       if (existingAnswer) {
-        // Update existing answer
         await supabase
           .from('test_answers')
           .update({ student_answer: answer })
           .eq('id', existingAnswer.id);
       } else {
-        // Create new answer
         await supabase
           .from('test_answers')
           .insert({
@@ -229,7 +228,6 @@ const TestAttempt = () => {
       }
     } catch (error) {
       console.error('Error saving answer:', error);
-      // Continue anyway - we don't want to interrupt the user
     }
   };
 
@@ -240,7 +238,6 @@ const TestAttempt = () => {
     if (timerRef.current) clearInterval(timerRef.current);
 
     try {
-      // Calculate score
       let score = 0;
       let totalPossible = 0;
 
@@ -250,7 +247,6 @@ const TestAttempt = () => {
         const userAnswer = answers.find(a => a.questionId === question.id)?.answer;
         if (!userAnswer) continue;
 
-        // Get correct answer
         const { data: questionData } = await supabase
           .from('test_questions')
           .select('correct_answer')
@@ -264,7 +260,6 @@ const TestAttempt = () => {
           score += question.marks;
         }
 
-        // Update the answer with correctness
         await supabase
           .from('test_answers')
           .update({ is_correct: isCorrect })
@@ -272,7 +267,6 @@ const TestAttempt = () => {
           .eq('question_id', question.id);
       }
 
-      // Update the attempt
       await supabase
         .from('test_attempts')
         .update({
@@ -283,7 +277,6 @@ const TestAttempt = () => {
         })
         .eq('id', attemptId);
 
-      // Navigate to results
       if (isTimeUp) {
         toast.info('Time\'s up! Your test has been submitted automatically.');
       } else {

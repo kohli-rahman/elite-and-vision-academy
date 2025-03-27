@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, BookOpen, Award, Users, BarChart } from 'lucide-react';
 
 const Hero = () => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -11,7 +11,7 @@ const Hero = () => {
   }, []);
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50" />
         <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-gradient-to-b from-blue-100/30 rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3" />
@@ -21,21 +21,54 @@ const Hero = () => {
       <div className="section-container pt-24 md:pt-32 flex flex-col md:flex-row items-center">
         <div className={`md:w-1/2 mb-12 md:mb-0 ${isLoaded ? 'animate-slide-in' : 'opacity-0'}`} style={{ animationDelay: '0.1s' }}>
           <div className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium bg-primary/10 text-primary mb-6">
-            <span className="animate-pulse-subtle">Now enrolling for 2023</span>
+            <span className="animate-pulse-subtle">Admissions Open 2023-24</span>
           </div>
           <h1 className="heading-xl mb-6 text-balance">
-            Unlocking Potential Through <span className="text-primary">Excellence</span>
+            Unlock Your <span className="text-primary">Academic Potential</span> with Apex Academy
           </h1>
           <p className="text-lg text-muted-foreground mb-8 max-w-lg">
-            At Excellence Academy, we nurture talent and foster growth with personalized coaching programs designed to bring out your best.
+            Expert coaching for CBSE, ICSE Board Exams and competitive exams like 
+            <span className="text-primary font-medium"> NTSE, IIT-JEE, NEET </span> 
+            with personalized attention and proven results.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
-            <Link to="/programs" className="btn-primary">
-              Explore Programs
+            <Link to="/auth" className="btn-primary">
+              Register Now
             </Link>
-            <Link to="/about" className="btn-secondary flex items-center">
-              Learn More <ChevronRight className="ml-1 h-4 w-4" />
+            <Link to="/programs" className="btn-secondary flex items-center">
+              Explore Programs <ChevronRight className="ml-1 h-4 w-4" />
             </Link>
+          </div>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-12">
+            <div className="flex flex-col items-center text-center">
+              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                <Users className="h-6 w-6 text-primary" />
+              </div>
+              <span className="text-2xl font-bold">800+</span>
+              <span className="text-xs text-muted-foreground">Students</span>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                <BookOpen className="h-6 w-6 text-primary" />
+              </div>
+              <span className="text-2xl font-bold">25+</span>
+              <span className="text-xs text-muted-foreground">Expert Faculty</span>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                <Award className="h-6 w-6 text-primary" />
+              </div>
+              <span className="text-2xl font-bold">95%</span>
+              <span className="text-xs text-muted-foreground">Success Rate</span>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                <BarChart className="h-6 w-6 text-primary" />
+              </div>
+              <span className="text-2xl font-bold">150+</span>
+              <span className="text-xs text-muted-foreground">Top Ranks</span>
+            </div>
           </div>
         </div>
 
@@ -44,8 +77,8 @@ const Hero = () => {
             <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-xl blur"></div>
             <div className="glass-card rounded-xl overflow-hidden">
               <img 
-                src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1742&q=80" 
-                alt="Students learning together" 
+                src="https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80" 
+                alt="Students studying in a classroom" 
                 className="w-full h-auto object-cover"
                 loading="lazy"
               />

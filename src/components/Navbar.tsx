@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
+import AuthStatus from './AuthStatus';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -47,7 +48,7 @@ const Navbar = () => {
           <div className="flex-shrink-0">
             <Link to="/" className="flex items-center">
               <span className="text-xl font-display font-bold tracking-tight text-foreground">
-                Excellence<span className="text-primary">Academy</span>
+                Apex<span className="text-primary">Academy</span>
               </span>
             </Link>
           </div>
@@ -67,16 +68,14 @@ const Navbar = () => {
                 {link.name}
               </Link>
             ))}
-            <Link
-              to="/enroll"
-              className="btn-primary"
-            >
-              Enroll Now
-            </Link>
+            <AuthStatus />
           </nav>
           
           {/* Mobile menu button */}
-          <div className="flex md:hidden">
+          <div className="flex md:hidden items-center space-x-4">
+            <div className="md:hidden">
+              <AuthStatus />
+            </div>
             <button
               type="button"
               className="text-gray-700 hover:text-primary"
@@ -110,12 +109,6 @@ const Navbar = () => {
                 {link.name}
               </Link>
             ))}
-            <Link
-              to="/enroll"
-              className="block mt-4 w-full text-center btn-primary"
-            >
-              Enroll Now
-            </Link>
           </div>
         </div>
       )}

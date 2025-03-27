@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import About from "./pages/About";
 import ProgramDetails from "./pages/ProgramDetails";
 import NotFound from "./pages/NotFound";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
             <Route path="/programs/:id" element={<ProgramDetails />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

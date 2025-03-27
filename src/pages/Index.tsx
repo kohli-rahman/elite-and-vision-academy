@@ -1,44 +1,63 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { ArrowRight, BookOpen, Users, Star, Award, MapPin, Phone, Mail } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import Hero from '@/components/Hero';
 import ProgramCard, { ProgramType } from '@/components/ProgramCard';
 import TestimonialCard, { TestimonialType } from '@/components/TestimonialCard';
-import InstructorProfile, { InstructorType } from '@/components/InstructorProfile';
+import FacultyCard, { FacultyType } from '@/components/FacultyCard';
 import ContactForm from '@/components/ContactForm';
-import { ArrowRight, BookOpen, Users, Star, Award } from 'lucide-react';
-import { Link } from 'react-router-dom';
+
+const fetchFaculty = async () => {
+  const { data, error } = await supabase
+    .from('faculty')
+    .select('*');
+  
+  if (error) {
+    throw error;
+  }
+  
+  return data;
+};
 
 const Index = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
+  const { data: facultyData, isLoading: isFacultyLoading } = useQuery({
+    queryKey: ['faculty'],
+    queryFn: fetchFaculty,
+  });
+
   const programs: ProgramType[] = [
     {
-      id: 'academic',
-      title: 'Academic Excellence',
-      description: 'Comprehensive coaching for academic subjects with personalized attention and regular assessments.',
-      duration: '12 Weeks',
+      id: 'board-exams',
+      title: 'Board Exam Excellence',
+      description: 'Comprehensive coaching for CBSE and ICSE board examinations with regular assessments and personalized attention.',
+      duration: '12 Months',
       groupSize: 'Small Groups',
-      level: 'All Levels',
+      level: 'Class 9-12',
       image: 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80',
     },
     {
-      id: 'test-prep',
-      title: 'Test Preparation',
-      description: 'Intensive preparation for standardized tests with practice sessions and performance analytics.',
-      duration: '8 Weeks',
-      groupSize: 'Max 10 Students',
-      level: 'Intermediate',
+      id: 'iit-jee',
+      title: 'IIT-JEE Preparation',
+      description: 'Intensive coaching for IIT-JEE (Main & Advanced) with concept building, problem-solving strategies and mock tests.',
+      duration: '24 Months',
+      groupSize: 'Max 15 Students',
+      level: 'Class 11-12',
       image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80',
     },
     {
-      id: 'career',
-      title: 'Career Development',
-      description: 'Career guidance and skill enhancement programs to prepare students for the professional world.',
-      duration: '16 Weeks',
-      groupSize: 'One-on-One',
-      level: 'Advanced',
+      id: 'neet',
+      title: 'NEET Preparation',
+      description: 'Specialized coaching for NEET with in-depth subject knowledge, extensive practice, and regular performance tracking.',
+      duration: '24 Months',
+      groupSize: 'Max 20 Students',
+      level: 'Class 11-12',
       image: 'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80',
     },
   ];
@@ -46,72 +65,27 @@ const Index = () => {
   const testimonials: TestimonialType[] = [
     {
       id: '1',
-      name: 'Sarah Johnson',
-      role: 'Medical Student',
-      image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1287&q=80',
-      testimonial: 'The academic coaching I received at Excellence Academy was instrumental in my success. The personalized approach and dedicated instructors made all the difference.',
-      rating: 5,
-    },
-    {
-      id: '2',
-      name: 'Michael Chen',
-      role: 'Engineering Graduate',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1287&q=80',
-      testimonial: 'The test preparation program helped me achieve a score I never thought possible. The strategies and practice materials were exactly what I needed.',
-      rating: 5,
-    },
-    {
-      id: '3',
-      name: 'Aisha Patel',
-      role: 'Business Professional',
-      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1288&q=80',
-      testimonial: 'The career development program gave me the confidence and skills to succeed in my interviews. I landed my dream job thanks to Excellence Academy!',
-      rating: 4,
-    },
-  ];
-
-  const instructors: InstructorType[] = [
-    {
-      id: '1',
-      name: 'Dr. James Wilson',
-      role: 'Academic Director',
-      image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80',
-      bio: 'Ph.D. in Education with over 15 years of experience in academic coaching and curriculum development.',
-      social: {
-        linkedin: 'https://linkedin.com',
-        twitter: 'https://twitter.com',
-      },
-    },
-    {
-      id: '2',
-      name: 'Prof. Emily Rodriguez',
-      role: 'Test Preparation Expert',
-      image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1361&q=80',
-      bio: 'Specialized in standardized test preparation with a track record of helping students achieve top scores.',
-      social: {
-        linkedin: 'https://linkedin.com',
-      },
-    },
-    {
-      id: '3',
-      name: 'Mark Thompson',
-      role: 'Career Coach',
+      name: 'Aditya Sharma',
+      role: 'IIT Delhi Student',
       image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1287&q=80',
-      bio: 'Former corporate recruiter with expertise in career development and professional skill enhancement.',
-      social: {
-        linkedin: 'https://linkedin.com',
-        twitter: 'https://twitter.com',
-      },
+      testimonial: 'The JEE coaching I received at Apex Academy was exceptional. The faculty's approach to complex topics and regular mock tests helped me secure a top rank.',
+      rating: 5,
     },
     {
-      id: '4',
-      name: 'Dr. Sarah Kim',
-      role: 'Leadership Trainer',
-      image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1287&q=80',
-      bio: 'Expert in leadership development with a background in organizational psychology and management.',
-      social: {
-        linkedin: 'https://linkedin.com',
-      },
+      id: '2',
+      name: 'Priya Patel',
+      role: 'NEET Qualifier',
+      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1288&q=80',
+      testimonial: 'The NEET preparation program at Apex Academy gave me a structured approach to study. The biology sessions were particularly helpful in building my foundation.',
+      rating: 5,
+    },
+    {
+      id: '3',
+      name: 'Raj Kumar',
+      role: 'NTSE Scholar',
+      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1287&q=80',
+      testimonial: 'The NTSE coaching program was comprehensive and well-structured. The faculty's guidance helped me crack the exam with a good score.',
+      rating: 4,
     },
   ];
 
@@ -125,7 +99,7 @@ const Index = () => {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12">
             <div>
               <span className="text-sm font-medium text-primary uppercase tracking-wider">Our Programs</span>
-              <h2 className="heading-lg mt-2">Transformative Learning Experiences</h2>
+              <h2 className="heading-lg mt-2">Academic Excellence Programs</h2>
             </div>
             <Link to="/programs" className="mt-4 md:mt-0 inline-flex items-center text-primary hover:underline">
               View All Programs <ArrowRight className="ml-1 h-4 w-4" />
@@ -148,9 +122,9 @@ const Index = () => {
         <div className="section-container relative">
           <div className="text-center mb-16 max-w-3xl mx-auto">
             <span className="text-sm font-medium text-primary uppercase tracking-wider">Why Choose Us</span>
-            <h2 className="heading-lg mt-2 mb-4">Excellence in Every Aspect</h2>
+            <h2 className="heading-lg mt-2 mb-4">Our Teaching Methodology</h2>
             <p className="text-muted-foreground">
-              Our coaching methodology is built on four key pillars that ensure comprehensive development and lasting results for every student.
+              At Apex Academy, our teaching methodology focuses on comprehensive development and proven results through our four key pillars.
             </p>
           </div>
           
@@ -159,9 +133,9 @@ const Index = () => {
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <BookOpen className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-lg font-medium mb-2">Personalized Approach</h3>
+              <h3 className="text-lg font-medium mb-2">Concept Clarity</h3>
               <p className="text-sm text-muted-foreground">
-                Customized learning plans tailored to individual strengths, weaknesses, and goals.
+                Strong focus on building clear concepts through visual learning and practical examples.
               </p>
             </div>
             
@@ -169,9 +143,9 @@ const Index = () => {
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Users className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-lg font-medium mb-2">Expert Instructors</h3>
+              <h3 className="text-lg font-medium mb-2">Expert Faculty</h3>
               <p className="text-sm text-muted-foreground">
-                Learn from industry professionals with extensive experience and proven track records.
+                Learn from IIT, NIT and medical college alumni with years of teaching experience.
               </p>
             </div>
             
@@ -179,9 +153,9 @@ const Index = () => {
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Star className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-lg font-medium mb-2">Proven Methods</h3>
+              <h3 className="text-lg font-medium mb-2">Regular Assessment</h3>
               <p className="text-sm text-muted-foreground">
-                Research-backed teaching methodologies that deliver consistent results.
+                Frequent tests and detailed performance analysis to track progress and identify improvement areas.
               </p>
             </div>
             
@@ -189,23 +163,50 @@ const Index = () => {
               <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <Award className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-lg font-medium mb-2">Holistic Development</h3>
+              <h3 className="text-lg font-medium mb-2">Personal Attention</h3>
               <p className="text-sm text-muted-foreground">
-                Focus on academic excellence alongside personal growth and soft skills.
+                Small batch sizes ensure individual attention and personalized guidance for each student.
               </p>
             </div>
           </div>
         </div>
       </section>
       
-      {/* Testimonials Section */}
+      {/* Faculty Section */}
       <section className="py-20 bg-white">
         <div className="section-container">
           <div className="text-center mb-16 max-w-3xl mx-auto">
-            <span className="text-sm font-medium text-primary uppercase tracking-wider">Testimonials</span>
+            <span className="text-sm font-medium text-primary uppercase tracking-wider">Our Team</span>
+            <h2 className="heading-lg mt-2 mb-4">Meet Our Expert Faculty</h2>
+            <p className="text-muted-foreground">
+              Our dedicated team of faculty members brings decades of experience and expertise to help you achieve academic excellence.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {isFacultyLoading ? (
+              Array(4).fill(0).map((_, index) => (
+                <div key={index} className="h-[400px] rounded-xl bg-gray-100 animate-pulse"></div>
+              ))
+            ) : facultyData ? (
+              facultyData.map((faculty: FacultyType, index: number) => (
+                <FacultyCard key={faculty.id} faculty={faculty} index={index} />
+              ))
+            ) : (
+              <p>Failed to load faculty information.</p>
+            )}
+          </div>
+        </div>
+      </section>
+      
+      {/* Testimonials Section */}
+      <section className="py-20 bg-gradient-to-r from-gray-50 to-blue-50">
+        <div className="section-container">
+          <div className="text-center mb-16 max-w-3xl mx-auto">
+            <span className="text-sm font-medium text-primary uppercase tracking-wider">Success Stories</span>
             <h2 className="heading-lg mt-2 mb-4">What Our Students Say</h2>
             <p className="text-muted-foreground">
-              Hear from our students about how Excellence Academy has helped them achieve their goals and transform their lives.
+              Hear from our students about how Apex Academy has helped them achieve their academic goals and secure top ranks.
             </p>
           </div>
           
@@ -217,34 +218,15 @@ const Index = () => {
         </div>
       </section>
       
-      {/* Instructors Section */}
-      <section className="py-20 bg-gradient-to-r from-gray-50 to-blue-50">
-        <div className="section-container">
-          <div className="text-center mb-16 max-w-3xl mx-auto">
-            <span className="text-sm font-medium text-primary uppercase tracking-wider">Our Team</span>
-            <h2 className="heading-lg mt-2 mb-4">Meet Our Expert Instructors</h2>
-            <p className="text-muted-foreground">
-              Our dedicated team of instructors brings a wealth of knowledge and experience to help you excel.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {instructors.map((instructor, index) => (
-              <InstructorProfile key={instructor.id} instructor={instructor} index={index} />
-            ))}
-          </div>
-        </div>
-      </section>
-      
       {/* Contact Section */}
       <section className="py-20 bg-white">
         <div className="section-container">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
               <span className="text-sm font-medium text-primary uppercase tracking-wider">Contact Us</span>
-              <h2 className="heading-lg mt-2 mb-6">Ready to Begin Your Journey?</h2>
+              <h2 className="heading-lg mt-2 mb-6">Start Your Academic Journey Today</h2>
               <p className="text-muted-foreground mb-8">
-                Reach out to us today to learn more about our programs and how we can help you achieve your goals. Our team is ready to answer any questions you may have.
+                Reach out to us to learn more about our programs and how we can help you achieve academic excellence. Our counselors are available to guide you through the admission process.
               </p>
               
               <div className="space-y-6">
@@ -255,7 +237,7 @@ const Index = () => {
                   <div>
                     <h3 className="font-medium mb-1">Visit Our Center</h3>
                     <p className="text-sm text-muted-foreground">
-                      123 Education Lane, Learning City, ED 12345
+                      123 Education Lane, New Delhi, India - 110001
                     </p>
                   </div>
                 </div>
@@ -267,7 +249,7 @@ const Index = () => {
                   <div>
                     <h3 className="font-medium mb-1">Call Us</h3>
                     <p className="text-sm text-muted-foreground">
-                      +1 (555) 123-4567
+                      +91 98765 43210
                     </p>
                   </div>
                 </div>
@@ -279,7 +261,7 @@ const Index = () => {
                   <div>
                     <h3 className="font-medium mb-1">Email Us</h3>
                     <p className="text-sm text-muted-foreground">
-                      info@excellenceacademy.com
+                      info@apexacademy.edu.in
                     </p>
                   </div>
                 </div>

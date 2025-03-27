@@ -59,7 +59,7 @@ const fetchUserAttempts = async (testId: string) => {
 const Tests = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
-  const [isFaculty, setIsFaculty] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   
   useEffect(() => {
     const checkUser = async () => {
@@ -67,9 +67,8 @@ const Tests = () => {
       const currentUser = data.session?.user || null;
       setUser(currentUser);
       
-      // In a real app, you'd check user roles from the database
-      // For now, we'll consider all authenticated users as potential faculty
-      setIsFaculty(!!currentUser);
+      // Check if user is the specific admin
+      setIsAdmin(currentUser?.email === '2201cs58_rahul@iitp.ac.in');
     };
     
     checkUser();
@@ -168,13 +167,13 @@ const Tests = () => {
         <div>
           <h1 className="heading-lg">Test Center</h1>
           <p className="text-muted-foreground">
-            {isFaculty 
+            {isAdmin 
               ? 'Create and manage your tests for students' 
               : 'Take tests and view your performance'}
           </p>
         </div>
         
-        {isFaculty && (
+        {isAdmin && (
           <Link to="/tests/create">
             <Button>
               <PlusCircle className="mr-2 h-4 w-4" />
@@ -208,7 +207,7 @@ const Tests = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    {isFaculty ? (
+                    {isAdmin ? (
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         test.is_published 
                           ? 'bg-green-100 text-green-800' 
@@ -223,7 +222,7 @@ const Tests = () => {
                     )}
                   </TableCell>
                   <TableCell className="text-right space-x-2">
-                    {isFaculty ? (
+                    {isAdmin ? (
                       <>
                         <Button variant="outline" size="sm" asChild>
                           <Link to={`/tests/${test.id}/edit`}>
@@ -258,11 +257,11 @@ const Tests = () => {
           <BookOpen className="h-12 w-12 mx-auto text-primary/60" />
           <h3 className="mt-4 text-lg font-medium">No Tests Available</h3>
           <p className="mt-2 text-muted-foreground">
-            {isFaculty 
+            {isAdmin 
               ? 'Create your first test to get started!' 
               : 'Check back later for available tests.'}
           </p>
-          {isFaculty && (
+          {isAdmin && (
             <Link to="/tests/create">
               <Button className="mt-4">
                 <PlusCircle className="mr-2 h-4 w-4" />

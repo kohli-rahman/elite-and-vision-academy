@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, BookOpen } from 'lucide-react';
@@ -8,6 +9,7 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -30,17 +32,11 @@ const Navbar = () => {
   useEffect(() => {
     const checkUser = async () => {
       const { data } = await supabase.auth.getSession();
-      setUser(data.session?.user || null);
+      const currentUser = data.session?.user || null;
+      setUser(currentUser);
       
-      const { data: authListener } = supabase.auth.onAuthStateChange(
-        (event, session) => {
-          setUser(session?.user || null);
-        }
-      );
-      
-      return () => {
-        authListener.subscription.unsubscribe();
-      };
+      // Check if user is admin
+      setIsAdmin(currentUser?.email === '2201cs58_rahul@iitp.ac.in');
     };
     
     checkUser();
@@ -54,6 +50,7 @@ const Navbar = () => {
   ];
 
   if (user) {
+    // Only add Tests option for admin or for users who aren't admins but need to take tests
     navLinks.push({ name: 'Tests', path: '/tests' });
   }
 

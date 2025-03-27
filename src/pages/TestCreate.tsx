@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { PlusCircle, MinusCircle, Check, Save, ArrowLeft } from 'lucide-react';
+import { PlusCircle, MinusCircle, Check, Save, ArrowLeft, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -31,6 +30,8 @@ type QuestionType = {
 const TestCreate = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [questions, setQuestions] = useState<QuestionType[]>([]);
 
@@ -53,7 +54,21 @@ const TestCreate = () => {
         navigate('/auth');
         return;
       }
-      setUser(data.session.user);
+      
+      const currentUser = data.session.user;
+      setUser(currentUser);
+      
+      // Check if user is the specific admin
+      const isAdminUser = currentUser.email === '2201cs58_rahul@iitp.ac.in';
+      setIsAdmin(isAdminUser);
+      
+      if (!isAdminUser) {
+        toast.error('You do not have permission to create tests');
+        navigate('/tests');
+        return;
+      }
+      
+      setIsLoading(false);
     };
     
     checkSession();
@@ -189,12 +204,29 @@ const TestCreate = () => {
     }
   };
 
-  if (!user) {
+  if (isLoading) {
     return (
       <div className="pt-24 min-h-screen section-container">
         <div className="text-center py-12">
           <div className="spinner"></div>
-          <p className="mt-4 text-muted-foreground">Checking authentication...</p>
+          <p className="mt-4 text-muted-foreground">Checking permissions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="pt-24 min-h-screen section-container">
+        <div className="text-center py-12">
+          <AlertCircle className="h-12 w-12 mx-auto text-destructive" />
+          <h2 className="mt-4 text-xl font-semibold">Access Denied</h2>
+          <p className="mt-2 text-muted-foreground">
+            You do not have permission to create tests.
+          </p>
+          <Button onClick={() => navigate('/tests')} className="mt-4">
+            Back to Tests
+          </Button>
         </div>
       </div>
     );

@@ -47,12 +47,8 @@ const Navbar = () => {
     { name: 'Programs', path: '/programs' },
     { name: 'About Us', path: '/about' },
     { name: 'Contact', path: '/contact' },
+    { name: 'Tests', path: '/tests' }, // Make Tests visible to all users
   ];
-
-  if (user) {
-    // Only add Tests option for admin or for users who aren't admins but need to take tests
-    navLinks.push({ name: 'Tests', path: '/tests' });
-  }
 
   const isActive = (path: string) => {
     return location.pathname === path;

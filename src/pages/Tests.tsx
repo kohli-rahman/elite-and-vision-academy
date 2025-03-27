@@ -20,20 +20,21 @@ import { toast } from 'sonner';
 
 // Fetch all tests based on user role
 const fetchTests = async () => {
-  const { data: sessionData } = await supabase.auth.getSession();
-  const user = sessionData.session?.user;
-  
-  if (!user) {
-    throw new Error('User not authenticated');
+  try {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const user = sessionData.session?.user;
+    
+    // Fetch tests regardless of authentication status
+    const { data, error } = await supabase
+      .from('tests')
+      .select('*, test_attempts(*)');
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error('Error fetching tests:', error);
+    return [];
   }
-
-  // Fetch tests created by the faculty or all published tests for students
-  const { data, error } = await supabase
-    .from('tests')
-    .select('*, test_attempts(*)');
-
-  if (error) throw error;
-  return data;
 };
 
 // Fetch user's attempts for a specific test
@@ -77,60 +78,62 @@ const Tests = () => {
   const { data: tests, isLoading, isError, refetch } = useQuery({
     queryKey: ['tests'],
     queryFn: fetchTests,
-    enabled: !!user, // Only fetch if user is authenticated
+    // Always fetch tests, regardless of authentication
+    enabled: true,
   });
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (!data.session) {
-        toast.error('Please log in to access the tests section');
-        navigate('/auth');
-      }
-    };
-    
-    checkSession();
-  }, [navigate]);
+  // Removed redirect to login since the Tests page is now accessible to all users
 
   const handleTakeTest = async (testId: string) => {
-    // Check if user has already attempted this test
-    const attempts = await fetchUserAttempts(testId);
-    
-    if (attempts && attempts.length > 0) {
-      const completedAttempt = attempts.find(a => a.status === 'completed');
-      
-      if (completedAttempt) {
-        // User already completed this test
-        navigate(`/tests/${testId}/results?attemptId=${completedAttempt.id}`);
-        return;
-      }
-      
-      const inProgressAttempt = attempts.find(a => a.status === 'in_progress');
-      if (inProgressAttempt) {
-        // Continue in-progress attempt
-        navigate(`/tests/${testId}/attempt?attemptId=${inProgressAttempt.id}`);
-        return;
-      }
-    }
-    
-    // Start a new attempt
-    const { data, error } = await supabase
-      .from('test_attempts')
-      .insert({
-        test_id: testId,
-        student_id: user.id,
-        status: 'in_progress'
-      })
-      .select()
-      .single();
-    
-    if (error) {
-      toast.error('Failed to start test: ' + error.message);
+    // Check if user is authenticated first
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) {
+      toast.error('Please log in to take tests');
+      navigate('/auth');
       return;
     }
     
-    navigate(`/tests/${testId}/attempt?attemptId=${data.id}`);
+    try {
+      // Check if user has already attempted this test
+      const attempts = await fetchUserAttempts(testId);
+      
+      if (attempts && attempts.length > 0) {
+        const completedAttempt = attempts.find(a => a.status === 'completed');
+        
+        if (completedAttempt) {
+          // User already completed this test
+          navigate(`/tests/${testId}/results?attemptId=${completedAttempt.id}`);
+          return;
+        }
+        
+        const inProgressAttempt = attempts.find(a => a.status === 'in_progress');
+        if (inProgressAttempt) {
+          // Continue in-progress attempt
+          navigate(`/tests/${testId}/attempt?attemptId=${inProgressAttempt.id}`);
+          return;
+        }
+      }
+      
+      // Start a new attempt
+      const { data: attemptData, error } = await supabase
+        .from('test_attempts')
+        .insert({
+          test_id: testId,
+          student_id: user.id,
+          status: 'in_progress'
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        toast.error('Failed to start test: ' + error.message);
+        return;
+      }
+      
+      navigate(`/tests/${testId}/attempt?attemptId=${attemptData.id}`);
+    } catch (error: any) {
+      toast.error('Error: ' + error.message);
+    }
   };
 
   if (isLoading) {

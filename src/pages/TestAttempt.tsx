@@ -15,6 +15,15 @@ import {
 import { Input } from '@/components/ui/input';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { 
+  AlertCircle, 
+  ClockIcon, 
+  Eraser, 
+  ChevronLeft, 
+  ChevronRight, 
+  CheckCircle2, 
+  AlertTriangle 
+} from 'lucide-react';
 
 type Question = {
   id: string;
@@ -49,6 +58,11 @@ type Answer = {
   answer: string | null;
 };
 
+const studentDetailsSchema = z.object({
+  studentName: z.string().min(3, { message: "Name must be at least 3 characters" }),
+  rollNumber: z.string().min(1, { message: "Roll number is required" })
+});
+
 const TestAttempt = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
@@ -65,7 +79,15 @@ const TestAttempt = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
-  const [showStudentDetailsForm, setShowStudentDetailsForm] = useState(false);
+  const [showStudentDetailsForm, setShowStudentDetailsForm] = useState(true);
+
+  const studentDetailsForm = useForm<z.infer<typeof studentDetailsSchema>>({
+    resolver: zodResolver(studentDetailsSchema),
+    defaultValues: {
+      studentName: "",
+      rollNumber: ""
+    }
+  });
 
   const timerRef = useRef<any>(null);
 
@@ -348,6 +370,25 @@ const TestAttempt = () => {
     const secs = seconds % 60;
     
     return `${hours > 0 ? `${hours}h ` : ''}${minutes}m ${secs}s`;
+  };
+
+  const onStudentDetailsSubmit = async (data: z.infer<typeof studentDetailsSchema>) => {
+    if (!attemptId) return;
+
+    try {
+      await supabase
+        .from('test_attempts')
+        .update({
+          student_name: data.studentName,
+          roll_number: data.rollNumber
+        })
+        .eq('id', attemptId);
+
+      setShowStudentDetailsForm(false);
+      toast.success('Student details saved successfully');
+    } catch (error: any) {
+      toast.error(`Error saving student details: ${error.message}`);
+    }
   };
 
   if (isLoading) {

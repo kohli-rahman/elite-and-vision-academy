@@ -732,7 +732,7 @@ const TestResults = () => {
                   </TableHeader>
                   <TableBody>
                     {rankings.map((entry) => {
-                      const isCurrentUser = entry.student_email === user?.email;
+                      const isCurrentUser = entry.attempt_id === attemptId;
                       
                       return (
                         <TableRow key={entry.rank} className={isCurrentUser ? "bg-primary/10" : ""}>

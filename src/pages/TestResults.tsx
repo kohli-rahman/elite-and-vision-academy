@@ -33,6 +33,7 @@ type TestResult = {
     score: number;
     total_possible: number;
     status: string;
+    negative_marks: number;
   };
   answers: {
     question_id: string;
@@ -203,7 +204,7 @@ const TestResults = () => {
     
     const correctAnswers = formattedAnswers.filter((a: any) => a.is_correct).length;
     const percentageScore = attempt.total_possible 
-      ? Math.round((attempt.score - (attempt.negative_marks || 0)) / attempt.total_possible) * 100 
+      ? Math.round((attempt.score - (attempt.negative_marks || 0)) / attempt.total_possible * 100) 
       : 0;
     
     const startTime = new Date(attempt.start_time);
@@ -247,12 +248,6 @@ const TestResults = () => {
         .order('score', { ascending: false });
       
       if (attemptsError) throw attemptsError;
-      
-      const studentIds = attempts.map((a: any) => a.student_id);
-      const { data: users, error: usersError } = await supabase
-        .from('auth.users')
-        .select('id, email')
-        .in('id', studentIds);
       
       const rankingsData: RankingEntry[] = attempts.map((attempt: any, index: number) => {
         const percentage = attempt.total_possible ? 

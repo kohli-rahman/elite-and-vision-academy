@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { ClockIcon, ChevronRight, ChevronLeft, AlertTriangle, CheckCircle2, AlertCircle, Eraser } from 'lucide-react';
@@ -23,6 +22,8 @@ type Test = {
   subject: string;
   duration: number;
   passing_percent: number;
+  negative_marking: boolean;
+  negative_marks_percent: number;
 };
 
 type Attempt = {
@@ -199,7 +200,6 @@ const TestAttempt = () => {
     };
   }, [timeLeft]);
 
-  // Update local state without saving to database
   const updateAnswer = (questionId: string, answer: string | null) => {
     setAnswers(prev => 
       prev.map(a => 
@@ -209,7 +209,6 @@ const TestAttempt = () => {
     setUnsavedChanges(true);
   };
 
-  // Method to erase/clear the selected answer for the current question
   const eraseAnswer = () => {
     const currentQuestionId = questions[currentQuestion]?.id;
     if (currentQuestionId) {
@@ -217,12 +216,10 @@ const TestAttempt = () => {
     }
   };
 
-  // Save all answers to the database
   const saveAllAnswers = async () => {
     if (!attemptId) return;
 
     try {
-      // Filter to only save answers that have values
       const answersToSave = answers.filter(a => a.answer !== null);
       
       for (const answer of answersToSave) {
@@ -260,7 +257,6 @@ const TestAttempt = () => {
   const submitTest = async (isTimeUp = false) => {
     if (!test || !attempt || !attemptId || isSubmitting) return;
 
-    // Save all answers before submitting
     await saveAllAnswers();
     
     setIsSubmitting(true);
@@ -269,6 +265,7 @@ const TestAttempt = () => {
     try {
       let score = 0;
       let totalPossible = 0;
+      let negativeMarks = 0;
 
       for (const question of questions) {
         totalPossible += question.marks;
@@ -287,6 +284,9 @@ const TestAttempt = () => {
         const isCorrect = userAnswer === questionData.correct_answer;
         if (isCorrect) {
           score += question.marks;
+        } else if (test.negative_marking && userAnswer) {
+          const deduction = (question.marks * test.negative_marks_percent) / 100;
+          negativeMarks += deduction;
         }
 
         await supabase
@@ -302,6 +302,7 @@ const TestAttempt = () => {
           end_time: new Date().toISOString(),
           status: 'completed',
           score,
+          negative_marks: negativeMarks,
           total_possible: totalPossible
         })
         .eq('id', attemptId);
@@ -528,7 +529,6 @@ const TestAttempt = () => {
                 <p>Unsupported question type</p>
               )}
               
-              {/* Erase button for clearing selected answer */}
               {currentAnswer && (
                 <Button 
                   variant="outline" 

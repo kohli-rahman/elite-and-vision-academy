@@ -119,6 +119,7 @@ export type Database = {
           created_at: string
           end_time: string | null
           id: string
+          negative_marks: number | null
           score: number | null
           start_time: string
           status: string
@@ -130,6 +131,7 @@ export type Database = {
           created_at?: string
           end_time?: string | null
           id?: string
+          negative_marks?: number | null
           score?: number | null
           start_time?: string
           status?: string
@@ -141,6 +143,7 @@ export type Database = {
           created_at?: string
           end_time?: string | null
           id?: string
+          negative_marks?: number | null
           score?: number | null
           start_time?: string
           status?: string
@@ -207,6 +210,8 @@ export type Database = {
           duration: number
           id: string
           is_published: boolean
+          negative_marking: boolean | null
+          negative_marks_percent: number | null
           passing_percent: number
           subject: string
           title: string
@@ -219,6 +224,8 @@ export type Database = {
           duration: number
           id?: string
           is_published?: boolean
+          negative_marking?: boolean | null
+          negative_marks_percent?: number | null
           passing_percent?: number
           subject: string
           title: string
@@ -231,6 +238,8 @@ export type Database = {
           duration?: number
           id?: string
           is_published?: boolean
+          negative_marking?: boolean | null
+          negative_marks_percent?: number | null
           passing_percent?: number
           subject?: string
           title?: string

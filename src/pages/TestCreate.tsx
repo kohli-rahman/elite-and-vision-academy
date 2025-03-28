@@ -43,6 +43,8 @@ const TestCreate = () => {
       duration: 60,
       passing_percent: 60,
       is_published: false,
+      negative_marking: false,
+      negative_marks_percent: 25,
     },
   });
 
@@ -172,6 +174,8 @@ const TestCreate = () => {
           duration: formData.duration,
           passing_percent: formData.passing_percent,
           is_published: formData.is_published,
+          negative_marking: formData.negative_marking,
+          negative_marks_percent: formData.negative_marking ? formData.negative_marks_percent : null,
           created_by: user.id,
         })
         .select()
@@ -346,6 +350,53 @@ const TestCreate = () => {
                       </FormItem>
                     )}
                   />
+                  
+                  <FormField
+                    control={form.control}
+                    name="negative_marking"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-4 bg-muted/20">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel>Enable Negative Marking</FormLabel>
+                          <p className="text-sm text-muted-foreground">
+                            Check this box to deduct marks for incorrect answers
+                          </p>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  {form.watch('negative_marking') && (
+                    <FormField
+                      control={form.control}
+                      name="negative_marks_percent"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Negative Marks Percentage*</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number" 
+                              min="1" 
+                              max="100" 
+                              {...field} 
+                              required 
+                              placeholder="e.g., 25% of the question marks"
+                            />
+                          </FormControl>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Percentage of the question marks to deduct for wrong answers (e.g., 25% means 0.25 marks deducted for a 1-mark question)
+                          </p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                   
                   <FormField
                     control={form.control}

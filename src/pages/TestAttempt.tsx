@@ -1,10 +1,12 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { ClockIcon, ChevronRight, ChevronLeft, AlertTriangle, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ClockIcon, ChevronRight, ChevronLeft, AlertTriangle, CheckCircle2, AlertCircle, Eraser } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Json } from '@/integrations/supabase/types';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 type Question = {
   id: string;
@@ -52,6 +54,7 @@ const TestAttempt = () => {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [unsavedChanges, setUnsavedChanges] = useState(false);
   
   const timerRef = useRef<any>(null);
 
@@ -133,7 +136,6 @@ const TestAttempt = () => {
           questionId: q.id,
           answer: null,
         }));
-        setAnswers(initialAnswers);
 
         const { data: existingAnswers, error: answersError } = await supabase
           .from('test_answers')
@@ -150,6 +152,8 @@ const TestAttempt = () => {
               : ans;
           });
           setAnswers(updatedAnswers);
+        } else {
+          setAnswers(initialAnswers);
         }
 
         if (testData && attemptData) {
@@ -195,45 +199,70 @@ const TestAttempt = () => {
     };
   }, [timeLeft]);
 
-  const saveAnswer = async (questionId: string, answer: string) => {
+  // Update local state without saving to database
+  const updateAnswer = (questionId: string, answer: string | null) => {
+    setAnswers(prev => 
+      prev.map(a => 
+        a.questionId === questionId ? { ...a, answer } : a
+      )
+    );
+    setUnsavedChanges(true);
+  };
+
+  // Method to erase/clear the selected answer for the current question
+  const eraseAnswer = () => {
+    const currentQuestionId = questions[currentQuestion]?.id;
+    if (currentQuestionId) {
+      updateAnswer(currentQuestionId, null);
+    }
+  };
+
+  // Save all answers to the database
+  const saveAllAnswers = async () => {
     if (!attemptId) return;
 
     try {
-      setAnswers(prev => 
-        prev.map(a => 
-          a.questionId === questionId ? { ...a, answer } : a
-        )
-      );
-
-      const { data: existingAnswer } = await supabase
-        .from('test_answers')
-        .select('id')
-        .eq('attempt_id', attemptId)
-        .eq('question_id', questionId)
-        .single();
-
-      if (existingAnswer) {
-        await supabase
+      // Filter to only save answers that have values
+      const answersToSave = answers.filter(a => a.answer !== null);
+      
+      for (const answer of answersToSave) {
+        const { data: existingAnswer } = await supabase
           .from('test_answers')
-          .update({ student_answer: answer })
-          .eq('id', existingAnswer.id);
-      } else {
-        await supabase
-          .from('test_answers')
-          .insert({
-            attempt_id: attemptId,
-            question_id: questionId,
-            student_answer: answer
-          });
+          .select('id')
+          .eq('attempt_id', attemptId)
+          .eq('question_id', answer.questionId)
+          .maybeSingle();
+
+        if (existingAnswer) {
+          await supabase
+            .from('test_answers')
+            .update({ student_answer: answer.answer })
+            .eq('id', existingAnswer.id);
+        } else {
+          await supabase
+            .from('test_answers')
+            .insert({
+              attempt_id: attemptId,
+              question_id: answer.questionId,
+              student_answer: answer.answer
+            });
+        }
       }
+      
+      setUnsavedChanges(false);
+      toast.success('Answers saved successfully');
     } catch (error) {
-      console.error('Error saving answer:', error);
+      console.error('Error saving answers:', error);
+      toast.error('Failed to save answers');
     }
   };
 
   const submitTest = async (isTimeUp = false) => {
     if (!test || !attempt || !attemptId || isSubmitting) return;
 
+    // Save all answers before submitting
+    await saveAllAnswers();
+    
     setIsSubmitting(true);
     if (timerRef.current) clearInterval(timerRef.current);
 
@@ -388,6 +417,18 @@ const TestAttempt = () => {
               style={{ width: `${(answeredCount / questions.length) * 100}%` }}
             ></div>
           </div>
+          
+          {unsavedChanges && (
+            <div className="flex justify-end mt-2">
+              <Button 
+                size="sm" 
+                variant="secondary" 
+                onClick={saveAllAnswers}
+              >
+                Save Answers
+              </Button>
+            </div>
+          )}
         </div>
       </div>
       
@@ -415,14 +456,14 @@ const TestAttempt = () => {
                           ? 'border-primary bg-primary/5' 
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
-                      onClick={() => saveAnswer(currentQuestionData.id, option)}
+                      onClick={() => updateAnswer(currentQuestionData.id, option)}
                     >
                       <input 
                         type="radio" 
                         id={`option-${index}`}
                         name={`question-${currentQuestionData.id}`}
                         checked={currentAnswer === option}
-                        onChange={() => saveAnswer(currentQuestionData.id, option)}
+                        onChange={() => updateAnswer(currentQuestionData.id, option)}
                         className="mr-3"
                       />
                       <label 
@@ -442,14 +483,14 @@ const TestAttempt = () => {
                         ? 'border-primary bg-primary/5' 
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
-                    onClick={() => saveAnswer(currentQuestionData.id, 'true')}
+                    onClick={() => updateAnswer(currentQuestionData.id, 'true')}
                   >
                     <input 
                       type="radio" 
                       id="option-true"
                       name={`question-${currentQuestionData.id}`}
                       checked={currentAnswer === 'true'}
-                      onChange={() => saveAnswer(currentQuestionData.id, 'true')}
+                      onChange={() => updateAnswer(currentQuestionData.id, 'true')}
                       className="mr-3"
                     />
                     <label 
@@ -465,14 +506,14 @@ const TestAttempt = () => {
                         ? 'border-primary bg-primary/5' 
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
-                    onClick={() => saveAnswer(currentQuestionData.id, 'false')}
+                    onClick={() => updateAnswer(currentQuestionData.id, 'false')}
                   >
                     <input 
                       type="radio" 
                       id="option-false"
                       name={`question-${currentQuestionData.id}`}
                       checked={currentAnswer === 'false'}
-                      onChange={() => saveAnswer(currentQuestionData.id, 'false')}
+                      onChange={() => updateAnswer(currentQuestionData.id, 'false')}
                       className="mr-3"
                     />
                     <label 
@@ -485,6 +526,19 @@ const TestAttempt = () => {
                 </div>
               ) : (
                 <p>Unsupported question type</p>
+              )}
+              
+              {/* Erase button for clearing selected answer */}
+              {currentAnswer && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={eraseAnswer} 
+                  className="mt-4"
+                >
+                  <Eraser className="h-4 w-4 mr-2" />
+                  Erase Selection
+                </Button>
               )}
             </div>
             
@@ -571,10 +625,20 @@ const TestAttempt = () => {
               <div className="flex gap-2">
                 <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0" />
                 <p className="text-amber-800 text-sm">
-                  Your answers are saved automatically. Click "Submit Test" when you're done to see your results.
+                  Don't forget to save your answers before submitting. Click "Save Answers" if you have unsaved changes.
                 </p>
               </div>
             </div>
+            
+            {unsavedChanges && (
+              <Button
+                variant="secondary"
+                className="w-full mt-4"
+                onClick={saveAllAnswers}
+              >
+                Save Answers
+              </Button>
+            )}
             
             <Button
               className="w-full mt-4 bg-green-600 hover:bg-green-700"

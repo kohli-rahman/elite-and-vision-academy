@@ -55,7 +55,7 @@ type TestResult = {
 type RankingEntry = {
   rank: number;
   student_name: string;
-  student_email: string;
+  roll_number: string;
   score: number;
   total_possible: number;
   percentage: number;
@@ -237,11 +237,11 @@ const TestResults = () => {
         .from('test_attempts')
         .select(`
           id, 
-          student_id,
+          student_name,
+          roll_number,
           score, 
           negative_marks,
-          total_possible,
-          profiles:student_id (full_name)
+          total_possible
         `)
         .eq('test_id', id)
         .eq('status', 'completed')
@@ -253,17 +253,10 @@ const TestResults = () => {
         const percentage = attempt.total_possible ? 
           Math.round(((attempt.score - (attempt.negative_marks || 0)) / attempt.total_possible) * 100) : 0;
         
-        let studentEmail = "Hidden";
-        if (attempt.student_id === user?.id) {
-          studentEmail = user.email;
-        } else if (isFaculty) {
-          studentEmail = `student${index+1}@example.com`;
-        }
-        
         return {
           rank: index + 1,
-          student_name: attempt.profiles?.full_name || 'Unknown Student',
-          student_email: studentEmail,
+          student_name: attempt.student_name || 'Unknown Student',
+          roll_number: attempt.roll_number || 'N/A',
           score: attempt.score || 0,
           negative_marks: attempt.negative_marks || 0,
           total_possible: attempt.total_possible || 0,
@@ -730,8 +723,8 @@ const TestResults = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Rank</TableHead>
-                      <TableHead>Student</TableHead>
-                      <TableHead>Email</TableHead>
+                      <TableHead>Student Name</TableHead>
+                      <TableHead>Roll Number</TableHead>
                       <TableHead>Score</TableHead>
                       <TableHead>Percentage</TableHead>
                       {isFaculty && <TableHead className="text-right">Actions</TableHead>}
@@ -752,7 +745,7 @@ const TestResults = () => {
                               </span>
                             )}
                           </TableCell>
-                          <TableCell>{entry.student_email}</TableCell>
+                          <TableCell>{entry.roll_number}</TableCell>
                           <TableCell>
                             {entry.score} / {entry.total_possible}
                             {entry.negative_marks > 0 && (

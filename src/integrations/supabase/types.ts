@@ -120,10 +120,12 @@ export type Database = {
           end_time: string | null
           id: string
           negative_marks: number | null
+          roll_number: string | null
           score: number | null
           start_time: string
           status: string
           student_id: string
+          student_name: string | null
           test_id: string
           total_possible: number | null
         }
@@ -132,10 +134,12 @@ export type Database = {
           end_time?: string | null
           id?: string
           negative_marks?: number | null
+          roll_number?: string | null
           score?: number | null
           start_time?: string
           status?: string
           student_id: string
+          student_name?: string | null
           test_id: string
           total_possible?: number | null
         }
@@ -144,10 +148,12 @@ export type Database = {
           end_time?: string | null
           id?: string
           negative_marks?: number | null
+          roll_number?: string | null
           score?: number | null
           start_time?: string
           status?: string
           student_id?: string
+          student_name?: string | null
           test_id?: string
           total_possible?: number | null
         }

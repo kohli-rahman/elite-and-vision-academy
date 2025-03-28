@@ -1,11 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { ClockIcon, ChevronRight, ChevronLeft, AlertTriangle, CheckCircle2, AlertCircle, Eraser } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Json } from '@/integrations/supabase/types';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { 
+  Form, 
+  FormControl, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormMessage 
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 type Question = {
   id: string;
@@ -56,7 +65,8 @@ const TestAttempt = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
-  
+  const [showStudentDetailsForm, setShowStudentDetailsForm] = useState(false);
+
   const timerRef = useRef<any>(null);
 
   useEffect(() => {
@@ -374,6 +384,49 @@ const TestAttempt = () => {
   )?.answer;
   
   const answeredCount = answers.filter(a => a.answer !== null).length;
+
+  if (showStudentDetailsForm) {
+    return (
+      <div className="pt-24 min-h-screen section-container flex items-center justify-center">
+        <div className="glass-card p-8 rounded-lg w-full max-w-md">
+          <h2 className="text-xl font-semibold mb-6">Enter Your Details</h2>
+          <Form {...studentDetailsForm}>
+            <form onSubmit={studentDetailsForm.handleSubmit(onStudentDetailsSubmit)} className="space-y-4">
+              <FormField
+                control={studentDetailsForm.control}
+                name="studentName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter your full name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={studentDetailsForm.control}
+                name="rollNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Roll Number</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter your roll number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full">
+                Start Test
+              </Button>
+            </form>
+          </Form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pt-24 min-h-screen pb-12 section-container">

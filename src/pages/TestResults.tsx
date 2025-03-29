@@ -6,6 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { AlertCircle, ArrowLeft, Download, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 type Question = {
   id: string;
@@ -29,6 +37,7 @@ type RankingEntry = {
   total_possible: number;
   percentage: number;
   rank?: number;
+  id: string; // attempt id
 };
 
 const TestResults = () => {
@@ -40,6 +49,7 @@ const TestResults = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<TestAnswer[]>([]);
   const [rankings, setRankings] = useState<RankingEntry[]>([]);
+  const [studentAttempts, setStudentAttempts] = useState<RankingEntry[]>([]);
   const [attempt, setAttempt] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -57,21 +67,42 @@ const TestResults = () => {
 
   useEffect(() => {
     const fetchResults = async () => {
-      if (!id || !attemptId) return;
+      if (!id) return;
 
       try {
         setIsLoading(true);
         
-        // Fetch test attempt
-        const { data: attemptData, error: attemptError } = await supabase
-          .from('test_attempts')
-          .select('*, test:tests(*)')
-          .eq('id', attemptId)
-          .single();
-        
-        if (attemptError) throw attemptError;
-        setAttempt(attemptData);
-        setTest(attemptData.test);
+        // Fetch test attempt if we have an attemptId
+        if (attemptId) {
+          const { data: attemptData, error: attemptError } = await supabase
+            .from('test_attempts')
+            .select('*, test:tests(*)')
+            .eq('id', attemptId)
+            .single();
+          
+          if (attemptError) throw attemptError;
+          setAttempt(attemptData);
+          setTest(attemptData.test);
+          
+          // Fetch answers for this attempt
+          const { data: answersData, error: answersError } = await supabase
+            .from('test_answers')
+            .select('*')
+            .eq('attempt_id', attemptId);
+          
+          if (answersError) throw answersError;
+          setAnswers(answersData);
+        } else {
+          // If no attempt ID is provided, just fetch the test
+          const { data: testData, error: testError } = await supabase
+            .from('tests')
+            .select('*')
+            .eq('id', id)
+            .single();
+          
+          if (testError) throw testError;
+          setTest(testData);
+        }
         
         // Fetch test questions
         const { data: questionsData, error: questionsError } = await supabase
@@ -99,31 +130,22 @@ const TestResults = () => {
         
         setQuestions(formattedQuestions);
         
-        // Fetch answers
-        const { data: answersData, error: answersError } = await supabase
-          .from('test_answers')
-          .select('*')
-          .eq('attempt_id', attemptId);
-        
-        if (answersError) throw answersError;
-        setAnswers(answersData);
-        
-        // If admin, fetch top performers
+        // If admin, fetch all student attempts for this test
         if (isAdmin) {
           const { data: rankingsData, error: rankingsError } = await supabase
             .from('test_attempts')
-            .select('student_name, roll_number, score, total_possible')
+            .select('id, student_name, roll_number, score, total_possible')
             .eq('test_id', id)
             .eq('status', 'completed')
-            .order('score', { ascending: false })
-            .limit(10);
+            .order('score', { ascending: false });
           
           if (rankingsError) throw rankingsError;
           
           // Calculate percentage scores and assign ranks for rankings
           const formattedRankings: RankingEntry[] = rankingsData.map((r: any, index: number) => ({
-            student_name: r.student_name,
-            roll_number: r.roll_number,
+            id: r.id,
+            student_name: r.student_name || 'Anonymous',
+            roll_number: r.roll_number || 'N/A',
             score: r.score || 0,
             total_possible: r.total_possible || 0,
             percentage: r.total_possible ? Math.round((r.score / r.total_possible) * 100) : 0,
@@ -131,6 +153,7 @@ const TestResults = () => {
           }));
           
           setRankings(formattedRankings);
+          setStudentAttempts(formattedRankings);
         }
         
         setIsLoading(false);
@@ -233,6 +256,11 @@ const TestResults = () => {
     
     return userRank || null;
   };
+  
+  const viewStudentAttempt = (attemptId: string) => {
+    // Navigate to the specific student's attempt results
+    window.location.href = `/tests/${id}/results?attemptId=${attemptId}`;
+  };
 
   if (isLoading) {
     return (
@@ -245,7 +273,7 @@ const TestResults = () => {
     );
   }
 
-  if (!test || !attempt) {
+  if (!test) {
     return (
       <div className="pt-24 min-h-screen section-container">
         <div className="text-center py-12">
@@ -265,7 +293,108 @@ const TestResults = () => {
     );
   }
   
-  const { score, total, percentage, negativeMark } = attempt.score !== undefined ? 
+  // If admin and no specific attempt is being viewed, show the student attempts table
+  if (isAdmin && !attemptId) {
+    return (
+      <div className="pt-24 min-h-screen pb-12 section-container">
+        <div className="mb-6">
+          <Button variant="outline" asChild>
+            <Link to="/tests">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Tests
+            </Link>
+          </Button>
+        </div>
+        
+        <div className="glass-card p-8 rounded-lg mb-8">
+          <h1 className="text-2xl font-bold mb-4">{test.title} - Student Results</h1>
+          <p className="text-muted-foreground mb-6">Subject: {test.subject}</p>
+          
+          {studentAttempts.length > 0 ? (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Rank</TableHead>
+                    <TableHead>Student Name</TableHead>
+                    <TableHead>Roll Number</TableHead>
+                    <TableHead>Score</TableHead>
+                    <TableHead>Percentage</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {studentAttempts.map((student) => (
+                    <TableRow key={student.id}>
+                      <TableCell>#{student.rank}</TableCell>
+                      <TableCell>{student.student_name}</TableCell>
+                      <TableCell>{student.roll_number}</TableCell>
+                      <TableCell>{student.score}/{student.total_possible}</TableCell>
+                      <TableCell>{student.percentage}%</TableCell>
+                      <TableCell>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          student.percentage >= (test.passing_percent || 0) 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          {student.percentage >= (test.passing_percent || 0) ? 'Passed' : 'Failed'}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => viewStudentAttempt(student.id)}
+                        >
+                          View Details
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p>No student attempts for this test yet.</p>
+            </div>
+          )}
+          
+          {/* Score Distribution Chart */}
+          {studentAttempts.length > 0 && (
+            <div className="mt-8">
+              <h3 className="font-medium mb-4">Score Distribution</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={studentAttempts}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="student_name" 
+                    label={{ value: 'Students', position: 'insideBottom', offset: -5 }}
+                    tick={false}
+                  />
+                  <YAxis 
+                    label={{ value: 'Score (%)', angle: -90, position: 'insideLeft' }}
+                  />
+                  <Tooltip 
+                    formatter={(value, name, props) => [`${value}%`, 'Score']}
+                    labelFormatter={(label) => {
+                      const entry = studentAttempts.find(r => r.student_name === label);
+                      return entry?.student_name || 'Anonymous';
+                    }}
+                  />
+                  <Bar dataKey="percentage" fill="#8884d8" name="Score" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+  
+  // Display individual attempt details (for both admin viewing a specific attempt and students viewing their own)
+  const { score, total, percentage, negativeMark } = attempt?.score !== undefined ? 
     { 
       score: attempt.score || 0, 
       total: attempt.total_possible || 0, 
@@ -280,9 +409,9 @@ const TestResults = () => {
     <div className="pt-24 min-h-screen pb-12 section-container">
       <div className="mb-6">
         <Button variant="outline" asChild>
-          <Link to="/tests">
+          <Link to={isAdmin ? `/tests/${id}/results` : "/tests"}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Tests
+            {isAdmin ? 'Back to All Results' : 'Back to Tests'}
           </Link>
         </Button>
       </div>
@@ -342,48 +471,12 @@ const TestResults = () => {
         
         <div className="p-4 rounded-md bg-primary/5 border border-primary/10">
           <p className="text-md">
-            {percentage >= 90 
-              ? "Outstanding! You have excellent understanding of the subject." 
-              : percentage >= 80 
-                ? "Great job! You have very good knowledge of the material."
-                : percentage >= 70 
-                  ? "Good work! You have a solid understanding of most concepts."
-                  : percentage >= (test?.passing_percent || 0) 
-                    ? "You've passed! Continue to strengthen your knowledge in weaker areas."
-                    : "You didn't pass this time. Review the material and try again."}
+            {getPerformanceSummary()}
           </p>
         </div>
         
         <div className="flex justify-end">
-          <Button onClick={() => {
-            if (!test || !questions.length) return;
-            
-            let content = `Test Results: ${test.title}\n`;
-            content += `Subject: ${test.subject}\n`;
-            content += `Student: ${attempt.student_name || 'Anonymous'}\n`;
-            content += `Score: ${score}/${total} (${percentage}%)\n`;
-            content += `Status: ${percentage >= (test.passing_percent || 0) ? 'PASSED' : 'FAILED'}\n\n`;
-            content += `Question Details:\n\n`;
-            
-            questions.forEach((q, index) => {
-              const { answered, isCorrect, answer } = getQuestionResult(q.id);
-              
-              content += `Q${index + 1}: ${q.question_text}\n`;
-              content += `Your Answer: ${answered ? answer : 'Not answered'}\n`;
-              content += `Correct Answer: ${getCorrectAnswerText(q)}\n`;
-              content += `Result: ${answered ? (isCorrect ? 'Correct' : 'Incorrect') : 'Not answered'}\n\n`;
-            });
-            
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `test_results_${test.title.replace(/\s+/g, '_')}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-          }}>
+          <Button onClick={downloadResults}>
             <Download className="h-4 w-4 mr-2" />
             Download Results
           </Button>
@@ -466,67 +559,6 @@ const TestResults = () => {
           })}
         </div>
       </div>
-      
-      {/* Rankings - Admin Only */}
-      {isAdmin && rankings.length > 0 && (
-        <div className="glass-card p-8 rounded-lg mb-8">
-          <div className="flex items-center mb-6">
-            <Trophy className="h-6 w-6 text-amber-500 mr-2" />
-            <h2 className="text-xl font-semibold">Test Rankings</h2>
-          </div>
-          
-          <div className="rounded-lg border overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-muted/50">
-                <tr>
-                  <th className="py-3 px-4 text-left">Rank</th>
-                  <th className="py-3 px-4 text-left">Student</th>
-                  <th className="py-3 px-4 text-right">Score</th>
-                  <th className="py-3 px-4 text-right">Percentage</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rankings.map((entry, index) => (
-                  <tr key={index} className="border-t">
-                    <td className="py-3 px-4">#{entry.rank || index + 1}</td>
-                    <td className="py-3 px-4">
-                      {entry.student_name || 'Anonymous'}
-                      {entry.roll_number && ` (${entry.roll_number})`}
-                    </td>
-                    <td className="py-3 px-4 text-right">{entry.score}/{entry.total_possible}</td>
-                    <td className="py-3 px-4 text-right">{entry.percentage}%</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          
-          <div className="mt-6">
-            <h3 className="font-medium mb-4">Score Distribution</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={rankings}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="student_name" 
-                  label={{ value: 'Students', position: 'insideBottom', offset: -5 }}
-                  tick={false}
-                />
-                <YAxis 
-                  label={{ value: 'Score (%)', angle: -90, position: 'insideLeft' }}
-                />
-                <Tooltip 
-                  formatter={(value, name, props) => [`${value}%`, 'Score']}
-                  labelFormatter={(label) => {
-                    const entry = rankings.find(r => r.student_name === label);
-                    return entry?.student_name || 'Anonymous';
-                  }}
-                />
-                <Bar dataKey="percentage" fill="#8884d8" name="Score" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

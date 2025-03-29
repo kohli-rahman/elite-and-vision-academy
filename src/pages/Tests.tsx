@@ -147,6 +147,10 @@ const Tests = () => {
     }
   };
 
+  const handleViewResults = (testId: string) => {
+    navigate(`/tests/${testId}/results`);
+  };
+
   if (isLoading) {
     return (
       <div className="pt-24 min-h-screen section-container">
@@ -244,11 +248,13 @@ const Tests = () => {
                             Edit
                           </Link>
                         </Button>
-                        <Button variant="outline" size="sm" asChild>
-                          <Link to={`/tests/${test.id}/results`}>
-                            <BarChart className="h-4 w-4 mr-1" />
-                            Results
-                          </Link>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleViewResults(test.id)}
+                        >
+                          <BarChart className="h-4 w-4 mr-1" />
+                          Results
                         </Button>
                       </>
                     ) : (

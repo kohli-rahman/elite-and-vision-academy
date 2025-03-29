@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -109,6 +108,14 @@ const Tests = () => {
           return;
         }
         
+        // Check if there are any completed attempts regardless of details
+        const anyCompletedAttempt = attempts.find(a => a.status === 'completed');
+        if (anyCompletedAttempt) {
+          toast.info('You have already completed this test. Viewing your results.');
+          navigate(`/tests/${testId}/results?attemptId=${anyCompletedAttempt.id}`);
+          return;
+        }
+        
         const inProgressAttempt = attempts.find(a => a.status === 'in_progress');
         if (inProgressAttempt) {
           // Continue in-progress attempt
@@ -123,7 +130,8 @@ const Tests = () => {
         .insert({
           test_id: testId,
           student_id: user.id,
-          status: 'in_progress'
+          status: 'in_progress',
+          start_time: new Date().toISOString()
         })
         .select()
         .single();

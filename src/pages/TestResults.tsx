@@ -28,6 +28,7 @@ type RankingEntry = {
   score: number;
   total_possible: number;
   percentage: number;
+  rank?: number;
 };
 
 const TestResults = () => {
@@ -80,7 +81,23 @@ const TestResults = () => {
           .order('created_at', { ascending: true });
         
         if (questionsError) throw questionsError;
-        setQuestions(questionsData);
+        
+        // Fix the type incompatibility by properly parsing the options
+        const formattedQuestions: Question[] = questionsData.map((q: any) => ({
+          id: q.id,
+          question_text: q.question_text,
+          question_type: q.question_type,
+          options: q.options ? 
+            (Array.isArray(q.options) ? q.options : 
+              typeof q.options === 'string' ? JSON.parse(q.options) : 
+              Array.isArray(JSON.parse(JSON.stringify(q.options))) ? 
+                JSON.parse(JSON.stringify(q.options)) : null) : 
+            null,
+          marks: q.marks,
+          correct_answer: q.correct_answer
+        }));
+        
+        setQuestions(formattedQuestions);
         
         // Fetch answers
         const { data: answersData, error: answersError } = await supabase
@@ -103,13 +120,14 @@ const TestResults = () => {
           
           if (rankingsError) throw rankingsError;
           
-          // Calculate percentage scores for rankings
-          const formattedRankings: RankingEntry[] = rankingsData.map((r: any) => ({
+          // Calculate percentage scores and assign ranks for rankings
+          const formattedRankings: RankingEntry[] = rankingsData.map((r: any, index: number) => ({
             student_name: r.student_name,
             roll_number: r.roll_number,
             score: r.score || 0,
             total_possible: r.total_possible || 0,
-            percentage: r.total_possible ? Math.round((r.score / r.total_possible) * 100) : 0
+            percentage: r.total_possible ? Math.round((r.score / r.total_possible) * 100) : 0,
+            rank: index + 1
           }));
           
           setRankings(formattedRankings);
@@ -178,12 +196,10 @@ const TestResults = () => {
   const downloadResults = () => {
     if (!test || !questions.length) return;
     
-    const { score, total, percentage } = getScore();
-    
     let content = `Test Results: ${test.title}\n`;
     content += `Subject: ${test.subject}\n`;
     content += `Student: ${attempt.student_name || 'Anonymous'}\n`;
-    content += `Score: ${score}/${total} (${percentage}%)\n`;
+    content += `Score: ${getScore().score}/${getScore().total} (${getScore().percentage}%)\n`;
     content += `Status: ${isPassed() ? 'PASSED' : 'FAILED'}\n\n`;
     content += `Question Details:\n\n`;
     
@@ -205,6 +221,17 @@ const TestResults = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const getUserRank = () => {
+    if (!rankings.length || !attempt) return null;
+    
+    const userRank = rankings.find(r => 
+      r.student_name === attempt.student_name && 
+      r.roll_number === attempt.roll_number
+    )?.rank;
+    
+    return userRank || null;
   };
 
   if (isLoading) {
@@ -238,7 +265,16 @@ const TestResults = () => {
     );
   }
   
-  const { score, total, percentage, negativeMark } = getScore();
+  const { score, total, percentage, negativeMark } = attempt.score !== undefined ? 
+    { 
+      score: attempt.score || 0, 
+      total: attempt.total_possible || 0, 
+      percentage: attempt.total_possible ? Math.round((attempt.score / attempt.total_possible) * 100) : 0,
+      negativeMark: attempt.negative_marks || 0
+    } : 
+    { score: 0, total: 0, percentage: 0, negativeMark: 0 };
+
+  const userRank = getUserRank();
 
   return (
     <div className="pt-24 min-h-screen pb-12 section-container">
@@ -270,8 +306,13 @@ const TestResults = () => {
                 {score}/{total}
               </div>
               <div className="text-lg text-muted-foreground">
-                {percentage}% {isPassed() ? 'Passed' : 'Failed'}
+                {percentage}% {percentage >= (test.passing_percent || 0) ? 'Passed' : 'Failed'}
               </div>
+              {userRank && (
+                <div className="text-md font-semibold text-primary">
+                  Rank: #{userRank}
+                </div>
+              )}
               {negativeMark > 0 && (
                 <div className="text-sm text-destructive">
                   Negative marks: {negativeMark}
@@ -288,11 +329,11 @@ const TestResults = () => {
           </div>
           <Progress 
             value={percentage} 
-            className={`h-2 ${isPassed() ? 'bg-green-200' : 'bg-red-200'}`}
+            className={`h-2 ${percentage >= (test.passing_percent || 0) ? 'bg-green-200' : 'bg-red-200'}`}
           />
           <div className="flex justify-between mt-1 text-xs text-muted-foreground">
             <span>0%</span>
-            <span className={`${isPassed() ? 'text-green-600' : 'text-red-600'} font-medium`}>
+            <span className={`${percentage >= (test.passing_percent || 0) ? 'text-green-600' : 'text-red-600'} font-medium`}>
               Passing: {test.passing_percent}%
             </span>
             <span>100%</span>
@@ -300,11 +341,49 @@ const TestResults = () => {
         </div>
         
         <div className="p-4 rounded-md bg-primary/5 border border-primary/10">
-          <p className="text-md">{getPerformanceSummary()}</p>
+          <p className="text-md">
+            {percentage >= 90 
+              ? "Outstanding! You have excellent understanding of the subject." 
+              : percentage >= 80 
+                ? "Great job! You have very good knowledge of the material."
+                : percentage >= 70 
+                  ? "Good work! You have a solid understanding of most concepts."
+                  : percentage >= (test?.passing_percent || 0) 
+                    ? "You've passed! Continue to strengthen your knowledge in weaker areas."
+                    : "You didn't pass this time. Review the material and try again."}
+          </p>
         </div>
         
         <div className="flex justify-end">
-          <Button onClick={downloadResults}>
+          <Button onClick={() => {
+            if (!test || !questions.length) return;
+            
+            let content = `Test Results: ${test.title}\n`;
+            content += `Subject: ${test.subject}\n`;
+            content += `Student: ${attempt.student_name || 'Anonymous'}\n`;
+            content += `Score: ${score}/${total} (${percentage}%)\n`;
+            content += `Status: ${percentage >= (test.passing_percent || 0) ? 'PASSED' : 'FAILED'}\n\n`;
+            content += `Question Details:\n\n`;
+            
+            questions.forEach((q, index) => {
+              const { answered, isCorrect, answer } = getQuestionResult(q.id);
+              
+              content += `Q${index + 1}: ${q.question_text}\n`;
+              content += `Your Answer: ${answered ? answer : 'Not answered'}\n`;
+              content += `Correct Answer: ${getCorrectAnswerText(q)}\n`;
+              content += `Result: ${answered ? (isCorrect ? 'Correct' : 'Incorrect') : 'Not answered'}\n\n`;
+            });
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `test_results_${test.title.replace(/\s+/g, '_')}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+          }}>
             <Download className="h-4 w-4 mr-2" />
             Download Results
           </Button>
@@ -409,7 +488,7 @@ const TestResults = () => {
               <tbody>
                 {rankings.map((entry, index) => (
                   <tr key={index} className="border-t">
-                    <td className="py-3 px-4">#{index + 1}</td>
+                    <td className="py-3 px-4">#{entry.rank || index + 1}</td>
                     <td className="py-3 px-4">
                       {entry.student_name || 'Anonymous'}
                       {entry.roll_number && ` (${entry.roll_number})`}

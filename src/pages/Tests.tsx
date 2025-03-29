@@ -82,8 +82,6 @@ const Tests = () => {
     enabled: true,
   });
 
-  // Removed redirect to login since the Tests page is now accessible to all users
-
   const handleTakeTest = async (testId: string) => {
     // Check if user is authenticated first
     const { data } = await supabase.auth.getSession();
@@ -98,10 +96,15 @@ const Tests = () => {
       const attempts = await fetchUserAttempts(testId);
       
       if (attempts && attempts.length > 0) {
-        const completedAttempt = attempts.find(a => a.status === 'completed');
+        // Check if there's a completed attempt with student details
+        const completedAttempt = attempts.find(a => 
+          a.status === 'completed' && 
+          a.student_name && 
+          a.roll_number
+        );
         
         if (completedAttempt) {
-          // User already completed this test
+          toast.info('You have already completed this test with your details.');
           navigate(`/tests/${testId}/results?attemptId=${completedAttempt.id}`);
           return;
         }
@@ -179,7 +182,7 @@ const Tests = () => {
         {isAdmin && (
           <Link to="/tests/create">
             <Button>
-              <PlusCircle className="mr-2 h-4 w-4" />
+              <PlusCircle className="h-4 w-4 mr-2" />
               Create Test
             </Button>
           </Link>

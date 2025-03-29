@@ -1,0 +1,5 @@
+
+project_id = "default-project"
+generate_types = false
+[storage]
+enable_storage = false

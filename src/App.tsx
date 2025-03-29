@@ -16,6 +16,7 @@ import TestCreate from "./pages/TestCreate";
 import TestEdit from "./pages/TestEdit";
 import TestAttempt from "./pages/TestAttempt";
 import TestResults from "./pages/TestResults";
+import Admission from "./pages/Admission";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/tests/:id/edit" element={<TestEdit />} />
             <Route path="/tests/:id/attempt" element={<TestAttempt />} />
             <Route path="/tests/:id/results" element={<TestResults />} />
+            <Route path="/admission" element={<Admission />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

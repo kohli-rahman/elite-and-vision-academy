@@ -32,7 +32,7 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Navbar />
-          <main className={`min-h-screen ${isMobile ? 'pb-16' : ''}`}>
+          <main className="min-h-screen safe-area-top">
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/about" element={<About />} />

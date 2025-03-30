@@ -186,9 +186,9 @@
 
 /* Add safe area for devices with notches */
 .safe-area-top {
-  @apply pt-safe;
+  @apply pt-4 md:pt-0;
 }
 
 .safe-area-bottom {
-  @apply pb-safe;
+  @apply pb-16 md:pb-0;
 }

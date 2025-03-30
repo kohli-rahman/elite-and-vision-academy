@@ -1,5 +1,5 @@
 
-import { ClockIcon } from 'lucide-react';
+import { ClockIcon, MenuIcon, XIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 type TestHeaderProps = {
@@ -14,6 +14,8 @@ type TestHeaderProps = {
   currentQuestion: number;
   unsavedChanges: boolean;
   onSaveAnswers: () => void;
+  onToggleNav?: () => void;
+  showingNav?: boolean;
 };
 
 export const TestHeader = ({
@@ -23,7 +25,9 @@ export const TestHeader = ({
   totalQuestions,
   currentQuestion,
   unsavedChanges,
-  onSaveAnswers
+  onSaveAnswers,
+  onToggleNav,
+  showingNav
 }: TestHeaderProps) => {
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -34,44 +38,62 @@ export const TestHeader = ({
   };
 
   return (
-    <div className="glass-card p-6 rounded-lg mb-6">
-      <div className="flex flex-wrap justify-between items-center gap-4">
-        <div>
-          <h1 className="text-xl font-semibold">{test.title}</h1>
-          <p className="text-muted-foreground">{test.subject}</p>
+    <div className="glass-card p-4 sm:p-6 rounded-lg mb-6">
+      <div className="flex justify-between items-center gap-4">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-lg sm:text-xl font-semibold truncate">{test.title}</h1>
+          <p className="text-sm text-muted-foreground">{test.subject}</p>
         </div>
         
-        <div className="flex items-center gap-2 font-medium">
-          <ClockIcon className="h-5 w-5 text-primary" />
+        {onToggleNav && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onToggleNav}
+            className="flex-shrink-0 ml-2"
+          >
+            {showingNav ? (
+              <XIcon className="h-5 w-5" />
+            ) : (
+              <MenuIcon className="h-5 w-5" />
+            )}
+            <span className="sr-only">
+              {showingNav ? "Hide question list" : "Show question list"}
+            </span>
+          </Button>
+        )}
+        
+        <div className="flex items-center gap-1 font-medium text-sm sm:text-base whitespace-nowrap">
+          <ClockIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
           {timeLeft !== null ? (
             <span className={timeLeft < 60 ? "text-destructive animate-pulse" : ""}>
-              Time Left: {formatTime(timeLeft)}
+              {formatTime(timeLeft)}
             </span>
           ) : (
-            <span>Duration: {test.duration} minutes</span>
+            <span>{test.duration}m</span>
           )}
         </div>
       </div>
       
-      <div className="mt-6 pt-4 border-t">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <span className="text-sm text-muted-foreground">Progress:</span>
+      <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t">
+        <div className="flex flex-wrap justify-between items-center mb-2 sm:mb-4 gap-y-2">
+          <div className="text-sm">
+            <span className="text-muted-foreground">Progress:</span>
             <span className="ml-2 font-medium">
-              {answeredCount} of {totalQuestions} questions answered
+              {answeredCount}/{totalQuestions}
             </span>
           </div>
-          <div>
-            <span className="text-sm text-muted-foreground">Question:</span>
+          <div className="text-sm">
+            <span className="text-muted-foreground">Question:</span>
             <span className="ml-2 font-medium">
-              {currentQuestion + 1} of {totalQuestions}
+              {currentQuestion + 1}/{totalQuestions}
             </span>
           </div>
         </div>
         
-        <div className="w-full bg-gray-200 rounded-full h-2.5">
+        <div className="w-full bg-gray-200 rounded-full h-2">
           <div 
-            className="bg-primary h-2.5 rounded-full" 
+            className="bg-primary h-2 rounded-full" 
             style={{ width: `${(answeredCount / totalQuestions) * 100}%` }}
           ></div>
         </div>
@@ -83,7 +105,7 @@ export const TestHeader = ({
               variant="secondary" 
               onClick={onSaveAnswers}
             >
-              Save Answers
+              Save
             </Button>
           </div>
         )}

@@ -42,24 +42,26 @@ export const QuestionCard = ({
   };
 
   return (
-    <div className="glass-card p-6 rounded-lg">
-      <div className="mb-6">
+    <div className="glass-card p-4 sm:p-6 rounded-lg w-full overflow-x-hidden">
+      <div className="mb-4 sm:mb-6">
         <div className="flex justify-between items-start">
           <h2 className="text-lg font-medium">Question {currentQuestionIndex + 1}</h2>
           <span className="text-sm bg-primary/10 text-primary px-2 py-1 rounded-full">
             {currentQuestion.marks} {currentQuestion.marks === 1 ? 'mark' : 'marks'}
           </span>
         </div>
-        <p className="mt-2 text-lg">{currentQuestion.question_text}</p>
+        <div className="mt-2 text-base sm:text-lg break-words">
+          <p className="whitespace-pre-wrap">{currentQuestion.question_text}</p>
+        </div>
       </div>
       
-      <div className="mb-8">
+      <div className="mb-6">
         {currentQuestion.question_type === 'multiple_choice' && currentQuestion.options ? (
           <div className="space-y-3">
             {currentQuestion.options.map((option, index) => (
               <div 
                 key={index}
-                className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
+                className={`flex items-start p-3 border rounded-lg cursor-pointer transition-colors break-words ${
                   currentAnswer === option 
                     ? 'border-primary bg-primary/5' 
                     : 'border-gray-200 hover:border-gray-300'
@@ -72,11 +74,11 @@ export const QuestionCard = ({
                   name={`question-${currentQuestion.id}`}
                   checked={currentAnswer === option}
                   onChange={() => updateAnswer(currentQuestion.id, option)}
-                  className="mr-3"
+                  className="mr-3 mt-1 flex-shrink-0"
                 />
                 <label 
                   htmlFor={`option-${index}`}
-                  className="cursor-pointer flex-grow"
+                  className="cursor-pointer flex-grow text-sm sm:text-base whitespace-pre-wrap"
                 >
                   {option}
                 </label>
@@ -154,31 +156,38 @@ export const QuestionCard = ({
           variant="outline" 
           onClick={goToPrevQuestion}
           disabled={currentQuestionIndex === 0}
+          size="sm"
+          className="px-2 sm:px-4"
         >
-          <ChevronLeft className="h-4 w-4 mr-2" />
-          Previous
+          <ChevronLeft className="h-4 w-4 mr-1 sm:mr-2" />
+          <span className="sm:inline">Previous</span>
         </Button>
         
         {currentQuestionIndex < totalQuestions - 1 ? (
-          <Button onClick={goToNextQuestion}>
-            Next
-            <ChevronRight className="h-4 w-4 ml-2" />
+          <Button 
+            onClick={goToNextQuestion}
+            size="sm"
+            className="px-2 sm:px-4"
+          >
+            <span className="sm:inline">Next</span>
+            <ChevronRight className="h-4 w-4 ml-1 sm:ml-2" />
           </Button>
         ) : (
           <Button 
             onClick={handleSubmitTest}
             disabled={isSubmitting}
-            className="bg-green-600 hover:bg-green-700"
+            className="bg-green-600 hover:bg-green-700 px-2 sm:px-4"
+            size="sm"
           >
             {isSubmitting ? (
               <>
                 <div className="spinner spinner-sm mr-2" />
-                Submitting...
+                <span className="sm:inline">Submitting...</span>
               </>
             ) : (
               <>
-                <CheckCircle2 className="h-4 w-4 mr-2" />
-                Submit Test
+                <CheckCircle2 className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="sm:inline">Submit</span>
               </>
             )}
           </Button>

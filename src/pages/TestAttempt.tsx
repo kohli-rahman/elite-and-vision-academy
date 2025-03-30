@@ -10,14 +10,17 @@ import { TestHeader } from '@/components/test-attempt/TestHeader';
 import { QuestionCard } from '@/components/test-attempt/QuestionCard';
 import { QuestionNavigation } from '@/components/test-attempt/QuestionNavigation';
 import { useTestAttempt } from '@/hooks/useTestAttempt';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const TestAttempt = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const attemptId = searchParams.get('attemptId');
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   
   const [user, setUser] = useState<any>(null);
+  const [showNav, setShowNav] = useState(false);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -53,9 +56,9 @@ const TestAttempt = () => {
 
   if (isLoading) {
     return (
-      <div className="pt-24 min-h-screen section-container">
+      <div className="pt-16 min-h-screen section-container">
         <div className="text-center py-12">
-          <div className="spinner"></div>
+          <div className="spinner mx-auto"></div>
           <p className="mt-4 text-muted-foreground">Loading test...</p>
         </div>
       </div>
@@ -64,7 +67,7 @@ const TestAttempt = () => {
 
   if (!test || !questions.length) {
     return (
-      <div className="pt-24 min-h-screen section-container">
+      <div className="pt-16 min-h-screen section-container">
         <div className="text-center py-12">
           <AlertCircle className="h-12 w-12 mx-auto text-destructive" />
           <h2 className="mt-4 text-xl font-semibold">Test Not Found</h2>
@@ -95,8 +98,12 @@ const TestAttempt = () => {
   
   const answeredCount = answers.filter(a => a.answer !== null).length;
 
+  const toggleNav = () => {
+    setShowNav(!showNav);
+  };
+
   return (
-    <div className="pt-24 min-h-screen pb-12 section-container">
+    <div className="pt-16 min-h-screen pb-12 section-container">
       <TestHeader 
         test={test}
         timeLeft={timeLeft}
@@ -105,35 +112,44 @@ const TestAttempt = () => {
         currentQuestion={currentQuestion}
         unsavedChanges={unsavedChanges}
         onSaveAnswers={saveAllAnswers}
+        onToggleNav={isMobile ? toggleNav : undefined}
+        showingNav={showNav}
       />
       
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-3">
-          <QuestionCard 
-            currentQuestion={currentQuestionData}
-            currentQuestionIndex={currentQuestion}
-            totalQuestions={questions.length}
-            currentAnswer={currentAnswerData}
-            updateAnswer={updateAnswer}
-            goToPrevQuestion={goToPrevQuestion}
-            goToNextQuestion={goToNextQuestion}
-            submitTest={submitTest}
-            isSubmitting={isSubmitting}
-          />
-        </div>
+        {(!isMobile || !showNav) && (
+          <div className="lg:col-span-3">
+            <QuestionCard 
+              currentQuestion={currentQuestionData}
+              currentQuestionIndex={currentQuestion}
+              totalQuestions={questions.length}
+              currentAnswer={currentAnswerData}
+              updateAnswer={updateAnswer}
+              goToPrevQuestion={goToPrevQuestion}
+              goToNextQuestion={goToNextQuestion}
+              submitTest={submitTest}
+              isSubmitting={isSubmitting}
+            />
+          </div>
+        )}
         
-        <div className="lg:col-span-1">
-          <QuestionNavigation 
-            questions={questions}
-            answers={answers}
-            currentQuestion={currentQuestion}
-            setCurrentQuestion={setCurrentQuestion}
-            unsavedChanges={unsavedChanges}
-            saveAllAnswers={saveAllAnswers}
-            submitTest={submitTest}
-            isSubmitting={isSubmitting}
-          />
-        </div>
+        {(!isMobile || showNav) && (
+          <div className={isMobile ? "col-span-1" : "lg:col-span-1"}>
+            <QuestionNavigation 
+              questions={questions}
+              answers={answers}
+              currentQuestion={currentQuestion}
+              setCurrentQuestion={(idx) => {
+                setCurrentQuestion(idx);
+                if (isMobile) setShowNav(false);
+              }}
+              unsavedChanges={unsavedChanges}
+              saveAllAnswers={saveAllAnswers}
+              submitTest={submitTest}
+              isSubmitting={isSubmitting}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

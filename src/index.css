@@ -134,3 +134,61 @@
 .spinner-sm {
   @apply h-4 w-4 border;
 }
+
+/* Mobile UX Improvements */
+@media (max-width: 640px) {
+  .mobile-menu {
+    @apply fixed top-0 left-0 w-full h-screen bg-background z-50 transform transition-transform duration-300 ease-in-out;
+  }
+  
+  .mobile-menu.open {
+    @apply translate-x-0;
+  }
+  
+  .mobile-menu.closed {
+    @apply -translate-x-full;
+  }
+  
+  .mobile-padding {
+    @apply px-4 py-3;
+  }
+  
+  .mobile-card {
+    @apply mx-2 rounded-xl shadow-md;
+  }
+  
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+}
+
+/* Bottom navigation for mobile */
+.bottom-nav {
+  @apply fixed bottom-0 left-0 right-0 bg-background border-t border-border p-2 flex justify-around items-center z-40;
+}
+
+.bottom-nav-item {
+  @apply flex flex-col items-center justify-center p-2 rounded-md;
+}
+
+.bottom-nav-icon {
+  @apply h-5 w-5 mb-1;
+}
+
+.bottom-nav-label {
+  @apply text-xs;
+}
+
+/* Improved mobile form inputs */
+.mobile-input {
+  @apply h-12 text-base px-4 rounded-lg w-full;
+}
+
+/* Add safe area for devices with notches */
+.safe-area-top {
+  @apply pt-safe;
+}
+
+.safe-area-bottom {
+  @apply pb-safe;
+}

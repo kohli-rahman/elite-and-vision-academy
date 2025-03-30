@@ -54,10 +54,14 @@ const handler = async (req: Request): Promise<Response> => {
       <p><strong>Additional Information:</strong> ${formData.additionalInfo || "Not provided"}</p>
     `;
 
+    // Using the verified email address as the recipient (verified with Resend)
+    // This is temporarily set to the verified email for testing
+    const verifiedEmail = "harsh171517@gmail.com"; // Use the email that's verified with Resend
+
     // Send email using Resend
     const emailResponse = await resend.emails.send({
       from: "Admission Application <onboarding@resend.dev>",
-      to: ["personal802129@gmail.com"],
+      to: [verifiedEmail], // Send to the verified email address
       subject: `New Admission Application: ${formData.fullName}`,
       html: emailContent,
       reply_to: formData.email,

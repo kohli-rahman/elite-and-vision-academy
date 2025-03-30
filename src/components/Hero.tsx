@@ -2,12 +2,29 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, BookOpen, Award, Users, BarChart } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Session } from '@supabase/supabase-js';
 
 const Hero = () => {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
     setIsLoaded(true);
+    
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session);
+      }
+    );
+
+    return () => subscription.unsubscribe();
   }, []);
 
   return (
@@ -32,9 +49,15 @@ const Hero = () => {
             with personalized attention and proven results.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
-            <Link to="/auth" className="btn-primary">
-              Register Now
-            </Link>
+            {session ? (
+              <Link to="/admission" className="btn-primary">
+                Apply for Admission
+              </Link>
+            ) : (
+              <Link to="/auth" className="btn-primary">
+                Register Now
+              </Link>
+            )}
             <Link to="/programs" className="btn-secondary flex items-center">
               Explore Programs <ChevronRight className="ml-1 h-4 w-4" />
             </Link>

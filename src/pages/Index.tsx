@@ -171,7 +171,7 @@ const Index = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {programs.slice(0, 6).map((program, index) => (
+            {programs.map((program, index) => (
               <ProgramCard key={program.id} program={program} index={index} />
             ))}
           </div>

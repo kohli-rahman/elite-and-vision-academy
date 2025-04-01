@@ -23,7 +23,7 @@ const ProgramCard = ({ program, index }: ProgramCardProps) => {
 
   return (
     <div 
-      className="group animate-slide-up rounded-xl overflow-hidden glass-card"
+      className="group animate-slide-up rounded-xl overflow-hidden glass-card h-full flex flex-col"
       style={{ animationDelay: `${0.1 + index * 0.1}s` }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -39,12 +39,12 @@ const ProgramCard = ({ program, index }: ProgramCardProps) => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
       </div>
       
-      <div className="p-6">
+      <div className="p-6 flex flex-col flex-grow">
         <div className="mb-4 flex justify-between items-start">
-          <h3 className="heading-sm text-balance">{program.title}</h3>
+          <h3 className="heading-sm text-balance font-semibold">{program.title}</h3>
         </div>
         
-        <p className="text-muted-foreground mb-6 line-clamp-2">
+        <p className="text-muted-foreground mb-6 line-clamp-3 flex-grow">
           {program.description}
         </p>
         
@@ -65,7 +65,7 @@ const ProgramCard = ({ program, index }: ProgramCardProps) => {
         
         <Link 
           to={`/programs/${program.id}`}
-          className="inline-flex items-center text-primary font-medium text-sm group-hover:gap-1.5 gap-1 transition-all"
+          className="inline-flex items-center text-primary font-medium text-sm group-hover:gap-1.5 gap-1 transition-all mt-auto"
         >
           View Program <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
         </Link>

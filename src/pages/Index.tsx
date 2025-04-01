@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, BookOpen, Users, Star, Award, MapPin, Phone, Mail } from 'lucide-react';
@@ -171,13 +172,13 @@ const Index = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {programs.map((program, index) => (
+            {programs.slice(0, 6).map((program, index) => (
               <ProgramCard key={program.id} program={program} index={index} />
             ))}
           </div>
           
           <div className="text-center mt-10">
-            <Link to="/programs/1" className="btn-primary">
+            <Link to="/programs" className="btn-primary">
               Explore All Programs
             </Link>
           </div>

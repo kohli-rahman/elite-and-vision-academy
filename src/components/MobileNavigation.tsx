@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, PlusCircle, BookOpen, UserPlus, Menu } from "lucide-react";
+import { Home, BookOpen, UserPlus, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -28,10 +28,10 @@ export function MobileNavigation() {
           isActive={location.pathname === "/admission"} 
         />
         <NavItem 
-          to="/tests/create" 
-          icon={<PlusCircle className="bottom-nav-icon" />} 
-          label="Add Test" 
-          isActive={location.pathname === "/tests/create"} 
+          to="/tests" 
+          icon={<ClipboardList className="bottom-nav-icon" />} 
+          label="Tests" 
+          isActive={location.pathname.includes("/tests")} 
         />
         <NavItem 
           to="/programs/1" 

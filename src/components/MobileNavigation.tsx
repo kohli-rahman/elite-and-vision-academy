@@ -1,6 +1,7 @@
+
 import * as React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, BookOpen, UserPlus, ClipboardList } from "lucide-react";
+import { Home, BookOpen, UserPlus, ClipboardList, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";

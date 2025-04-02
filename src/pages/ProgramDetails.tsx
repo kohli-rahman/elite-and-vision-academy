@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Clock, Users, Award, BookOpen, CheckCircle2, ArrowLeft, FileText, PenLine } from 'lucide-react';
@@ -263,7 +262,7 @@ const ProgramDetails = () => {
         'Biology diagrams and visual explanations',
         'Application-based problem solving',
         'Regular mock tests with NEET pattern',
-        'Previous years' question paper analysis',
+        "Previous years' question paper analysis",
         'Medical terminology and concepts',
         'Time management training'
       ],

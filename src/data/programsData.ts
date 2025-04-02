@@ -378,7 +378,7 @@ const programsData = {
     longDescription: [
       'The Class 10 Board Success program is our comprehensive coaching solution for students appearing for Class 10 board examinations (CBSE, ICSE, or State Boards).',
       'This intensive program covers all subjects in the Class 10 curriculum with special focus on board exam patterns, marking schemes, and answering techniques.',
-      'With extensive practice through sample papers, previous years' questions, and regular mock tests, we ensure that students are thoroughly prepared for this important milestone in their academic journey.'
+      "With extensive practice through sample papers, previous years' questions, and regular mock tests, we ensure that students are thoroughly prepared for this important milestone in their academic journey."
     ],
     duration: '12 Months',
     sessions: '144 Sessions (3 per week)',

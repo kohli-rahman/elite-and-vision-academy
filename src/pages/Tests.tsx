@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { 
   PlusCircle, Edit, Eye, Clock, BookOpen, 
-  CheckCircle, AlertCircle, BarChart 
+  CheckCircle, AlertCircle, BarChart, Download, Trash2
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,15 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
 
 // Fetch all tests based on user role
 const fetchTests = async () => {
@@ -60,6 +70,7 @@ const Tests = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [testToDelete, setTestToDelete] = useState<string | null>(null);
   
   useEffect(() => {
     const checkUser = async () => {
@@ -149,6 +160,104 @@ const Tests = () => {
 
   const handleViewResults = (testId: string) => {
     navigate(`/tests/${testId}/results`);
+  };
+
+  const downloadRankings = async (testId: string, testTitle: string) => {
+    try {
+      // Fetch all attempts for this test with student details
+      const { data: rankings, error } = await supabase
+        .from('test_attempts')
+        .select('id, student_name, roll_number, score, total_possible, status')
+        .eq('test_id', testId)
+        .eq('status', 'completed')
+        .order('score', { ascending: false });
+      
+      if (error) {
+        throw error;
+      }
+
+      if (!rankings || rankings.length === 0) {
+        toast.info('No submissions available for this test');
+        return;
+      }
+      
+      // Calculate percentage scores and assign ranks
+      const formattedRankings = rankings.map((r: any, index: number) => ({
+        rank: index + 1,
+        name: r.student_name || 'Anonymous',
+        roll: r.roll_number || 'N/A',
+        score: r.score || 0,
+        total: r.total_possible || 0,
+        percentage: r.total_possible ? Math.round((r.score / r.total_possible) * 100) : 0
+      }));
+      
+      // Create CSV content
+      let csvContent = "Rank,Student Name,Roll Number,Score,Total Marks,Percentage\n";
+      formattedRankings.forEach(ranking => {
+        csvContent += `${ranking.rank},"${ranking.name}","${ranking.roll}",${ranking.score},${ranking.total},${ranking.percentage}%\n`;
+      });
+      
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${testTitle.replace(/\s+/g, '_')}_Rankings.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast.success('Rankings downloaded successfully');
+    } catch (error: any) {
+      toast.error(`Failed to download rankings: ${error.message}`);
+    }
+  };
+
+  const deleteTest = async (testId: string) => {
+    try {
+      // Delete all answers for this test's attempts
+      const { data: attempts } = await supabase
+        .from('test_attempts')
+        .select('id')
+        .eq('test_id', testId);
+      
+      if (attempts && attempts.length > 0) {
+        const attemptIds = attempts.map(a => a.id);
+        
+        // Delete test answers
+        await supabase
+          .from('test_answers')
+          .delete()
+          .in('attempt_id', attemptIds);
+        
+        // Delete test attempts
+        await supabase
+          .from('test_attempts')
+          .delete()
+          .eq('test_id', testId);
+      }
+      
+      // Delete test questions
+      await supabase
+        .from('test_questions')
+        .delete()
+        .eq('test_id', testId);
+      
+      // Delete the test
+      const { error } = await supabase
+        .from('tests')
+        .delete()
+        .eq('id', testId);
+      
+      if (error) throw error;
+      
+      setTestToDelete(null);
+      refetch();
+      toast.success('Test deleted successfully');
+    } catch (error: any) {
+      toast.error(`Failed to delete test: ${error.message}`);
+    }
   };
 
   if (isLoading) {
@@ -256,6 +365,23 @@ const Tests = () => {
                           <BarChart className="h-4 w-4 mr-1" />
                           Results
                         </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => downloadRankings(test.id, test.title)}
+                        >
+                          <Download className="h-4 w-4 mr-1" />
+                          Rankings
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 border-red-200"
+                          onClick={() => setTestToDelete(test.id)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Delete
+                        </Button>
                       </>
                     ) : (
                       <Button 
@@ -291,6 +417,32 @@ const Tests = () => {
           )}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!testToDelete} onOpenChange={(open) => !open && setTestToDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Test</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this test? This will permanently remove the test, all questions, and all student attempts. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="outline">
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button 
+              type="button" 
+              variant="destructive"
+              onClick={() => testToDelete && deleteTest(testToDelete)}
+            >
+              Delete Test
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

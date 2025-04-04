@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { PlusCircle, MinusCircle, Check, Save, ArrowLeft, AlertCircle, Image, Superscript } from 'lucide-react';
+import { PlusCircle, MinusCircle, Check, Save, ArrowLeft, AlertCircle, Superscript } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -40,7 +40,6 @@ type QuestionType = {
   options: string[];
   correct_answer: string;
   marks: number;
-  image_url?: string;
 };
 
 const TestCreate = () => {
@@ -51,7 +50,6 @@ const TestCreate = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [questions, setQuestions] = useState<QuestionType[]>([]);
   const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
-  const [uploadingImage, setUploadingImage] = useState(false);
   const [showFormatting, setShowFormatting] = useState(false);
   
   const form = useForm({
@@ -149,83 +147,43 @@ const TestCreate = () => {
     }));
   };
   
-  const handleImageUpload = async (questionId: string, e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) {
-      return;
-    }
-    
-    const file = e.target.files[0];
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${crypto.randomUUID()}.${fileExt}`;
-    const filePath = `question_images/${fileName}`;
-    
-    try {
-      setUploadingImage(true);
-      
-      // Check if storage bucket exists, if not, we'll create it
-      const { data: bucketData } = await supabase.storage.getBucket('question_images');
-      
-      if (!bucketData) {
-        const { error: bucketError } = await supabase.storage.createBucket('question_images', {
-          public: true,
-          fileSizeLimit: 5242880, // 5MB
-        });
-        
-        if (bucketError) throw bucketError;
-      }
-      
-      const { error: uploadError } = await supabase.storage
-        .from('question_images')
-        .upload(filePath, file);
-      
-      if (uploadError) throw uploadError;
-      
-      // Get the public URL
-      const { data } = supabase.storage.from('question_images').getPublicUrl(filePath);
-      
-      updateQuestion(questionId, 'image_url', data.publicUrl);
-      toast.success('Image uploaded successfully!');
-    } catch (error: any) {
-      toast.error('Error uploading image: ' + error.message);
-    } finally {
-      setUploadingImage(false);
-      e.target.value = ''; // Clear the input
-    }
-  };
-  
-  const removeImage = (questionId: string) => {
-    // Find the question
-    const question = questions.find(q => q.id === questionId);
-    if (!question || !question.image_url) return;
-    
-    // Extract the file path from the URL
-    const urlParts = question.image_url.split('/');
-    const fileName = urlParts[urlParts.length - 1];
-    
-    // Remove from storage
-    supabase.storage
-      .from('question_images')
-      .remove([`question_images/${fileName}`])
-      .then(() => {
-        updateQuestion(questionId, 'image_url', undefined);
-        toast.success('Image removed.');
-      })
-      .catch((error) => {
-        toast.error('Failed to remove image.');
-        console.error('Error removing image:', error);
-      });
-  };
-  
-  const insertTextFormat = (questionId: string, format: 'superscript' | 'subscript') => {
+  const insertTextFormat = (questionId: string, format: 'superscript' | 'subscript' | 'fraction' | 'sqrt' | 'cbrt' | 'degree' | 'pi' | 'theta' | 'delta' | 'infinity') => {
     const question = questions.find(q => q.id === questionId);
     if (!question) return;
     
     let formattedText = '';
     
-    if (format === 'superscript') {
-      formattedText = '<sup>text</sup>';
-    } else {
-      formattedText = '<sub>text</sub>';
+    switch (format) {
+      case 'superscript':
+        formattedText = '<sup>text</sup>';
+        break;
+      case 'subscript':
+        formattedText = '<sub>text</sub>';
+        break;
+      case 'fraction':
+        formattedText = '<div class="fraction"><span class="numerator">a</span><span class="denominator">b</span></div>';
+        break;
+      case 'sqrt':
+        formattedText = '√(x)';
+        break;
+      case 'cbrt':
+        formattedText = '∛(x)';
+        break;
+      case 'degree':
+        formattedText = '°';
+        break;
+      case 'pi':
+        formattedText = 'π';
+        break;
+      case 'theta':
+        formattedText = 'θ';
+        break;
+      case 'delta':
+        formattedText = 'Δ';
+        break;
+      case 'infinity':
+        formattedText = '∞';
+        break;
     }
     
     const updatedText = question.question_text + formattedText;
@@ -294,7 +252,6 @@ const TestCreate = () => {
         options: q.question_type === 'multiple_choice' ? q.options : null,
         correct_answer: q.correct_answer,
         marks: q.marks,
-        image_url: q.image_url || null,
       }));
 
       const { error: questionsError } = await supabase
@@ -564,22 +521,6 @@ const TestCreate = () => {
                             <div className="flex justify-between items-center mb-2">
                               <Label htmlFor={`q-${question.id}-text`}>Question Text*</Label>
                               <div className="flex items-center gap-2">
-                                <label 
-                                  htmlFor={`image-${question.id}`}
-                                  className="flex items-center gap-1 cursor-pointer text-sm text-primary hover:text-primary/80"
-                                >
-                                  <Image className="h-4 w-4" />
-                                  {question.image_url ? 'Change Image' : 'Add Image'}
-                                </label>
-                                <input
-                                  type="file"
-                                  id={`image-${question.id}`}
-                                  accept="image/*"
-                                  onChange={(e) => handleImageUpload(question.id, e)}
-                                  className="hidden"
-                                  disabled={uploadingImage}
-                                />
-                                
                                 <Popover open={showFormatting && activeQuestionId === question.id} onOpenChange={(open) => {
                                   setShowFormatting(open);
                                   if (open) setActiveQuestionId(question.id);
@@ -589,7 +530,7 @@ const TestCreate = () => {
                                       <Superscript className="h-4 w-4" />
                                     </Button>
                                   </PopoverTrigger>
-                                  <PopoverContent className="w-56">
+                                  <PopoverContent className="w-72">
                                     <div className="grid gap-2">
                                       <h4 className="font-medium text-sm">Text Formatting</h4>
                                       <div className="grid grid-cols-2 gap-2">
@@ -612,6 +553,86 @@ const TestCreate = () => {
                                           <span className="ml-1">H<sub>2</sub>O</span>
                                         </Button>
                                       </div>
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm" 
+                                          className="w-full"
+                                          onClick={() => insertTextFormat(question.id, 'fraction')}
+                                        >
+                                          Fraction
+                                          <span className="ml-1">a/b</span>
+                                        </Button>
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm" 
+                                          className="w-full"
+                                          onClick={() => insertTextFormat(question.id, 'sqrt')}
+                                        >
+                                          Square Root
+                                          <span className="ml-1">√</span>
+                                        </Button>
+                                      </div>
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm" 
+                                          className="w-full"
+                                          onClick={() => insertTextFormat(question.id, 'cbrt')}
+                                        >
+                                          Cube Root
+                                          <span className="ml-1">∛</span>
+                                        </Button>
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm" 
+                                          className="w-full"
+                                          onClick={() => insertTextFormat(question.id, 'degree')}
+                                        >
+                                          Degree
+                                          <span className="ml-1">°</span>
+                                        </Button>
+                                      </div>
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm" 
+                                          className="w-full"
+                                          onClick={() => insertTextFormat(question.id, 'pi')}
+                                        >
+                                          Pi
+                                          <span className="ml-1">π</span>
+                                        </Button>
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm" 
+                                          className="w-full"
+                                          onClick={() => insertTextFormat(question.id, 'theta')}
+                                        >
+                                          Theta
+                                          <span className="ml-1">θ</span>
+                                        </Button>
+                                      </div>
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm" 
+                                          className="w-full"
+                                          onClick={() => insertTextFormat(question.id, 'delta')}
+                                        >
+                                          Delta
+                                          <span className="ml-1">Δ</span>
+                                        </Button>
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm" 
+                                          className="w-full"
+                                          onClick={() => insertTextFormat(question.id, 'infinity')}
+                                        >
+                                          Infinity
+                                          <span className="ml-1">∞</span>
+                                        </Button>
+                                      </div>
                                       <p className="text-xs text-muted-foreground mt-1">
                                         Format will be applied at cursor position or end of text
                                       </p>
@@ -621,30 +642,11 @@ const TestCreate = () => {
                               </div>
                             </div>
                             
-                            {question.image_url && (
-                              <div className="mb-3 relative">
-                                <img 
-                                  src={question.image_url} 
-                                  alt="Question visual" 
-                                  className="max-h-40 rounded-md border border-border"
-                                />
-                                <Button
-                                  type="button"
-                                  variant="destructive"
-                                  size="sm"
-                                  className="absolute top-1 right-1"
-                                  onClick={() => removeImage(question.id)}
-                                >
-                                  Remove
-                                </Button>
-                              </div>
-                            )}
-                            
                             <Textarea 
                               id={`q-${question.id}-text`}
                               value={question.question_text}
                               onChange={(e) => updateQuestion(question.id, 'question_text', e.target.value)}
-                              placeholder="Enter your question here. Use <sup>text</sup> for superscript and <sub>text</sub> for subscript."
+                              placeholder="Enter your question here. Use text formatting options for mathematical expressions."
                               className="mt-1"
                               required
                             />
@@ -823,7 +825,7 @@ const TestCreate = () => {
               </li>
               <li className="flex gap-2">
                 <Check className="h-5 w-5 text-primary flex-shrink-0" />
-                <span>Use images to illustrate complex problems</span>
+                <span>Use text formatting tools for mathematical expressions (√, π, ∞, etc.)</span>
               </li>
               <li className="flex gap-2">
                 <Check className="h-5 w-5 text-primary flex-shrink-0" />

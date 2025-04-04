@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { PlusCircle, MinusCircle, Check, Save, ArrowLeft, AlertCircle } from 'lucide-react';
+import { PlusCircle, MinusCircle, Check, Save, ArrowLeft, AlertCircle, Image, Superscript } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Form,
   FormControl,
@@ -17,6 +18,20 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 type QuestionType = {
   id: string;
@@ -25,6 +40,7 @@ type QuestionType = {
   options: string[];
   correct_answer: string;
   marks: number;
+  image_url?: string;
 };
 
 const TestCreate = () => {
@@ -34,7 +50,10 @@ const TestCreate = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [questions, setQuestions] = useState<QuestionType[]>([]);
-
+  const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [showFormatting, setShowFormatting] = useState(false);
+  
   const form = useForm({
     defaultValues: {
       title: '',
@@ -129,6 +148,90 @@ const TestCreate = () => {
       return q;
     }));
   };
+  
+  const handleImageUpload = async (questionId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) {
+      return;
+    }
+    
+    const file = e.target.files[0];
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${crypto.randomUUID()}.${fileExt}`;
+    const filePath = `question_images/${fileName}`;
+    
+    try {
+      setUploadingImage(true);
+      
+      // Check if storage bucket exists, if not, we'll create it
+      const { data: bucketData } = await supabase.storage.getBucket('question_images');
+      
+      if (!bucketData) {
+        const { error: bucketError } = await supabase.storage.createBucket('question_images', {
+          public: true,
+          fileSizeLimit: 5242880, // 5MB
+        });
+        
+        if (bucketError) throw bucketError;
+      }
+      
+      const { error: uploadError } = await supabase.storage
+        .from('question_images')
+        .upload(filePath, file);
+      
+      if (uploadError) throw uploadError;
+      
+      // Get the public URL
+      const { data } = supabase.storage.from('question_images').getPublicUrl(filePath);
+      
+      updateQuestion(questionId, 'image_url', data.publicUrl);
+      toast.success('Image uploaded successfully!');
+    } catch (error: any) {
+      toast.error('Error uploading image: ' + error.message);
+    } finally {
+      setUploadingImage(false);
+      e.target.value = ''; // Clear the input
+    }
+  };
+  
+  const removeImage = (questionId: string) => {
+    // Find the question
+    const question = questions.find(q => q.id === questionId);
+    if (!question || !question.image_url) return;
+    
+    // Extract the file path from the URL
+    const urlParts = question.image_url.split('/');
+    const fileName = urlParts[urlParts.length - 1];
+    
+    // Remove from storage
+    supabase.storage
+      .from('question_images')
+      .remove([`question_images/${fileName}`])
+      .then(() => {
+        updateQuestion(questionId, 'image_url', undefined);
+        toast.success('Image removed.');
+      })
+      .catch((error) => {
+        toast.error('Failed to remove image.');
+        console.error('Error removing image:', error);
+      });
+  };
+  
+  const insertTextFormat = (questionId: string, format: 'superscript' | 'subscript') => {
+    const question = questions.find(q => q.id === questionId);
+    if (!question) return;
+    
+    let formattedText = '';
+    
+    if (format === 'superscript') {
+      formattedText = '<sup>text</sup>';
+    } else {
+      formattedText = '<sub>text</sub>';
+    }
+    
+    const updatedText = question.question_text + formattedText;
+    updateQuestion(questionId, 'question_text', updatedText);
+    setShowFormatting(false);
+  };
 
   const onSubmit = async (formData: any) => {
     if (!user) {
@@ -191,6 +294,7 @@ const TestCreate = () => {
         options: q.question_type === 'multiple_choice' ? q.options : null,
         correct_answer: q.correct_answer,
         marks: q.marks,
+        image_url: q.image_url || null,
       }));
 
       const { error: questionsError } = await supabase
@@ -457,15 +561,98 @@ const TestCreate = () => {
                         
                         <div className="space-y-4">
                           <div>
-                            <Label htmlFor={`q-${question.id}-text`}>Question Text*</Label>
+                            <div className="flex justify-between items-center mb-2">
+                              <Label htmlFor={`q-${question.id}-text`}>Question Text*</Label>
+                              <div className="flex items-center gap-2">
+                                <label 
+                                  htmlFor={`image-${question.id}`}
+                                  className="flex items-center gap-1 cursor-pointer text-sm text-primary hover:text-primary/80"
+                                >
+                                  <Image className="h-4 w-4" />
+                                  {question.image_url ? 'Change Image' : 'Add Image'}
+                                </label>
+                                <input
+                                  type="file"
+                                  id={`image-${question.id}`}
+                                  accept="image/*"
+                                  onChange={(e) => handleImageUpload(question.id, e)}
+                                  className="hidden"
+                                  disabled={uploadingImage}
+                                />
+                                
+                                <Popover open={showFormatting && activeQuestionId === question.id} onOpenChange={(open) => {
+                                  setShowFormatting(open);
+                                  if (open) setActiveQuestionId(question.id);
+                                }}>
+                                  <PopoverTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="p-1 h-auto">
+                                      <Superscript className="h-4 w-4" />
+                                    </Button>
+                                  </PopoverTrigger>
+                                  <PopoverContent className="w-56">
+                                    <div className="grid gap-2">
+                                      <h4 className="font-medium text-sm">Text Formatting</h4>
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm" 
+                                          className="w-full"
+                                          onClick={() => insertTextFormat(question.id, 'superscript')}
+                                        >
+                                          Superscript
+                                          <span className="ml-1">x<sup>2</sup></span>
+                                        </Button>
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm" 
+                                          className="w-full"
+                                          onClick={() => insertTextFormat(question.id, 'subscript')}
+                                        >
+                                          Subscript
+                                          <span className="ml-1">H<sub>2</sub>O</span>
+                                        </Button>
+                                      </div>
+                                      <p className="text-xs text-muted-foreground mt-1">
+                                        Format will be applied at cursor position or end of text
+                                      </p>
+                                    </div>
+                                  </PopoverContent>
+                                </Popover>
+                              </div>
+                            </div>
+                            
+                            {question.image_url && (
+                              <div className="mb-3 relative">
+                                <img 
+                                  src={question.image_url} 
+                                  alt="Question visual" 
+                                  className="max-h-40 rounded-md border border-border"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="sm"
+                                  className="absolute top-1 right-1"
+                                  onClick={() => removeImage(question.id)}
+                                >
+                                  Remove
+                                </Button>
+                              </div>
+                            )}
+                            
                             <Textarea 
                               id={`q-${question.id}-text`}
                               value={question.question_text}
                               onChange={(e) => updateQuestion(question.id, 'question_text', e.target.value)}
-                              placeholder="Enter your question here"
+                              placeholder="Enter your question here. Use <sup>text</sup> for superscript and <sub>text</sub> for subscript."
                               className="mt-1"
                               required
                             />
+                            <div className="mt-1 flex gap-2 text-xs text-muted-foreground">
+                              <div className="flex items-center">
+                                <span>Example: Energy = mc<sup>2</sup> is written as "Energy = mc<strong>&lt;sup&gt;</strong>2<strong>&lt;/sup&gt;</strong>"</span>
+                              </div>
+                            </div>
                           </div>
                           
                           <div>
@@ -633,6 +820,14 @@ const TestCreate = () => {
               <li className="flex gap-2">
                 <Check className="h-5 w-5 text-primary flex-shrink-0" />
                 <span>Assign appropriate marks to each question based on difficulty</span>
+              </li>
+              <li className="flex gap-2">
+                <Check className="h-5 w-5 text-primary flex-shrink-0" />
+                <span>Use images to illustrate complex problems</span>
+              </li>
+              <li className="flex gap-2">
+                <Check className="h-5 w-5 text-primary flex-shrink-0" />
+                <span>Use superscript for exponents (x<sup>2</sup>) and subscripts for chemical formulas (H<sub>2</sub>O)</span>
               </li>
               <li className="flex gap-2">
                 <Check className="h-5 w-5 text-primary flex-shrink-0" />

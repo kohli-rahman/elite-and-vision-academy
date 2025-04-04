@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { PlusCircle, MinusCircle, Check, Save, ArrowLeft, AlertCircle, Superscript } from 'lucide-react';
+import { PlusCircle, MinusCircle, Check, Save, ArrowLeft, AlertCircle, Superscript, SquareRoot } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -78,7 +77,6 @@ const TestCreate = () => {
       const currentUser = data.session.user;
       setUser(currentUser);
       
-      // Check if user is the specific admin
       const isAdminUser = currentUser.email === '2201cs58_rahul@iitp.ac.in';
       setIsAdmin(isAdminUser);
       
@@ -148,7 +146,7 @@ const TestCreate = () => {
     }));
   };
   
-  const insertTextFormat = (questionId: string, format: 'superscript' | 'subscript' | 'fraction' | 'sqrt' | 'cbrt' | 'degree' | 'pi' | 'theta' | 'delta' | 'infinity') => {
+  const insertTextFormat = (questionId: string, format: 'superscript' | 'subscript' | 'fraction' | 'sqrt' | 'cbrt' | 'nthroot' | 'degree' | 'pi' | 'theta' | 'delta' | 'infinity' | 'sqrtfraction' | 'radical' | 'vector') => {
     const question = questions.find(q => q.id === questionId);
     if (!question) return;
     
@@ -165,10 +163,22 @@ const TestCreate = () => {
         formattedText = '<div class="fraction"><span class="numerator">a</span><span class="denominator">b</span></div>';
         break;
       case 'sqrt':
-        formattedText = '√(x)';
+        formattedText = '<span class="math-root"><span class="math-root-symbol">√</span><span>x</span></span>';
         break;
       case 'cbrt':
-        formattedText = '∛(x)';
+        formattedText = '<span class="math-root"><span class="math-root-symbol">∛</span><span>x</span></span>';
+        break;
+      case 'nthroot':
+        formattedText = '<span><sup>n</sup><span class="math-root"><span class="math-root-symbol">√</span><span>x</span></span></span>';
+        break;
+      case 'sqrtfraction':
+        formattedText = '<span class="math-root"><span class="math-root-symbol">√</span><span><div class="fraction"><span class="numerator">a</span><span class="denominator">b</span></div></span></span>';
+        break;
+      case 'radical':
+        formattedText = '<span class="math-root"><span class="math-root-symbol">√</span><span>a + b</span></span>';
+        break;
+      case 'vector':
+        formattedText = '<span>→</span>';
         break;
       case 'degree':
         formattedText = '°';
@@ -203,7 +213,6 @@ const TestCreate = () => {
       return;
     }
 
-    // Validate questions
     for (const q of questions) {
       if (!q.question_text) {
         toast.error('All questions must have text');
@@ -226,7 +235,6 @@ const TestCreate = () => {
     setIsSubmitting(true);
 
     try {
-      // First, create the test
       const { data: test, error: testError } = await supabase
         .from('tests')
         .insert({
@@ -245,7 +253,6 @@ const TestCreate = () => {
 
       if (testError) throw testError;
 
-      // Then, create all questions for this test
       const questionsToInsert = questions.map(q => ({
         test_id: test.id,
         question_text: q.question_text,
@@ -269,6 +276,49 @@ const TestCreate = () => {
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .math-root {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+      }
+      .math-root:before {
+        content: "";
+        border-top: 1px solid currentColor;
+        position: absolute;
+        top: 0;
+        left: 0.7em;
+        right: 0;
+      }
+      .math-root-symbol {
+        margin-right: 2px;
+      }
+      .fraction {
+        display: inline-block;
+        vertical-align: middle;
+        text-align: center;
+        margin: 0 0.2em;
+      }
+      .numerator, .denominator {
+        display: block;
+      }
+      .numerator {
+        border-bottom: 1px solid;
+        padding: 0 3px;
+      }
+      .denominator {
+        padding: 0 3px;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   if (isLoading) {
     return (
@@ -297,6 +347,231 @@ const TestCreate = () => {
       </div>
     );
   }
+
+  const renderMathExamples = () => {
+    return (
+      <div className="mb-4 p-3 border rounded-lg bg-muted/30">
+        <h4 className="font-medium text-sm mb-2">Examples:</h4>
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div>
+            <span>x<sup>2</sup> (Superscript)</span>
+          </div>
+          <div>
+            <span>H<sub>2</sub>O (Subscript)</span>
+          </div>
+          <div>
+            <div className="fraction" style={{display: "inline-block"}}>
+              <span className="numerator">a</span>
+              <span className="denominator">b</span>
+            </div>
+            <span> (Fraction)</span>
+          </div>
+          <div>
+            <span className="math-root">
+              <span className="math-root-symbol">√</span>
+              <span>x</span>
+            </span>
+            <span> (Square Root)</span>
+          </div>
+          <div>
+            <span>
+              <span className="math-root">
+                <span className="math-root-symbol">√</span>
+                <span>
+                  <div className="fraction" style={{display: "inline-block"}}>
+                    <span className="numerator">a</span>
+                    <span className="denominator">b</span>
+                  </div>
+                </span>
+              </span>
+            </span>
+            <span> (Root of Fraction)</span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderFormattingPopover = (question) => {
+    return (
+      <PopoverContent className="w-80">
+        <div className="grid gap-2">
+          <h4 className="font-medium text-sm">Math Formatting</h4>
+          
+          <Tabs defaultValue="basics">
+            <TabsList className="grid grid-cols-3">
+              <TabsTrigger value="basics">Basics</TabsTrigger>
+              <TabsTrigger value="roots">Roots</TabsTrigger>
+              <TabsTrigger value="symbols">Symbols</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="basics" className="mt-2">
+              <div className="grid grid-cols-2 gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => insertTextFormat(question.id, 'superscript')}
+                >
+                  Superscript
+                  <span className="ml-1">x<sup>2</sup></span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => insertTextFormat(question.id, 'subscript')}
+                >
+                  Subscript
+                  <span className="ml-1">H<sub>2</sub>O</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => insertTextFormat(question.id, 'fraction')}
+                >
+                  Fraction
+                  <span className="ml-1">a/b</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => insertTextFormat(question.id, 'vector')}
+                >
+                  Vector
+                  <span className="ml-1">→</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => insertTextFormat(question.id, 'degree')}
+                >
+                  Degree
+                  <span className="ml-1">°</span>
+                </Button>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="roots" className="mt-2">
+              <div className="grid grid-cols-2 gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => insertTextFormat(question.id, 'sqrt')}
+                >
+                  Square Root
+                  <span className="ml-1">√x</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => insertTextFormat(question.id, 'cbrt')}
+                >
+                  Cube Root
+                  <span className="ml-1">∛x</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => insertTextFormat(question.id, 'nthroot')}
+                >
+                  nth Root
+                  <span className="ml-1"><sup>n</sup>√x</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => insertTextFormat(question.id, 'sqrtfraction')}
+                >
+                  Root of Fraction
+                  <span className="ml-1">√(a/b)</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => insertTextFormat(question.id, 'radical')}
+                >
+                  Radical
+                  <span className="ml-1">√(a+b)</span>
+                </Button>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="symbols" className="mt-2">
+              <div className="grid grid-cols-2 gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => insertTextFormat(question.id, 'pi')}
+                >
+                  Pi
+                  <span className="ml-1">π</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => insertTextFormat(question.id, 'theta')}
+                >
+                  Theta
+                  <span className="ml-1">θ</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => insertTextFormat(question.id, 'delta')}
+                >
+                  Delta
+                  <span className="ml-1">Δ</span>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => insertTextFormat(question.id, 'infinity')}
+                >
+                  Infinity
+                  <span className="ml-1">∞</span>
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
+          
+          {renderMathExamples()}
+          
+          <p className="text-xs text-muted-foreground">
+            Format will be applied at cursor position or end of text
+          </p>
+        </div>
+      </PopoverContent>
+    );
+  };
+
+  const renderFormattingButton = (question) => {
+    return (
+      <Popover open={showFormatting && activeQuestionId === question.id} onOpenChange={(open) => {
+        setShowFormatting(open);
+        if (open) setActiveQuestionId(question.id);
+      }}>
+        <PopoverTrigger asChild>
+          <Button variant="ghost" size="sm" className="p-1 h-auto">
+            <SquareRoot className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        {renderFormattingPopover(question)}
+      </Popover>
+    );
+  };
 
   return (
     <div className="pt-24 min-h-screen pb-12 section-container">
@@ -522,124 +797,7 @@ const TestCreate = () => {
                             <div className="flex justify-between items-center mb-2">
                               <Label htmlFor={`q-${question.id}-text`}>Question Text*</Label>
                               <div className="flex items-center gap-2">
-                                <Popover open={showFormatting && activeQuestionId === question.id} onOpenChange={(open) => {
-                                  setShowFormatting(open);
-                                  if (open) setActiveQuestionId(question.id);
-                                }}>
-                                  <PopoverTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="p-1 h-auto">
-                                      <Superscript className="h-4 w-4" />
-                                    </Button>
-                                  </PopoverTrigger>
-                                  <PopoverContent className="w-72">
-                                    <div className="grid gap-2">
-                                      <h4 className="font-medium text-sm">Text Formatting</h4>
-                                      <div className="grid grid-cols-2 gap-2">
-                                        <Button 
-                                          variant="outline" 
-                                          size="sm" 
-                                          className="w-full"
-                                          onClick={() => insertTextFormat(question.id, 'superscript')}
-                                        >
-                                          Superscript
-                                          <span className="ml-1">x<sup>2</sup></span>
-                                        </Button>
-                                        <Button 
-                                          variant="outline" 
-                                          size="sm" 
-                                          className="w-full"
-                                          onClick={() => insertTextFormat(question.id, 'subscript')}
-                                        >
-                                          Subscript
-                                          <span className="ml-1">H<sub>2</sub>O</span>
-                                        </Button>
-                                      </div>
-                                      <div className="grid grid-cols-2 gap-2">
-                                        <Button 
-                                          variant="outline" 
-                                          size="sm" 
-                                          className="w-full"
-                                          onClick={() => insertTextFormat(question.id, 'fraction')}
-                                        >
-                                          Fraction
-                                          <span className="ml-1">a/b</span>
-                                        </Button>
-                                        <Button 
-                                          variant="outline" 
-                                          size="sm" 
-                                          className="w-full"
-                                          onClick={() => insertTextFormat(question.id, 'sqrt')}
-                                        >
-                                          Square Root
-                                          <span className="ml-1">√</span>
-                                        </Button>
-                                      </div>
-                                      <div className="grid grid-cols-2 gap-2">
-                                        <Button 
-                                          variant="outline" 
-                                          size="sm" 
-                                          className="w-full"
-                                          onClick={() => insertTextFormat(question.id, 'cbrt')}
-                                        >
-                                          Cube Root
-                                          <span className="ml-1">∛</span>
-                                        </Button>
-                                        <Button 
-                                          variant="outline" 
-                                          size="sm" 
-                                          className="w-full"
-                                          onClick={() => insertTextFormat(question.id, 'degree')}
-                                        >
-                                          Degree
-                                          <span className="ml-1">°</span>
-                                        </Button>
-                                      </div>
-                                      <div className="grid grid-cols-2 gap-2">
-                                        <Button 
-                                          variant="outline" 
-                                          size="sm" 
-                                          className="w-full"
-                                          onClick={() => insertTextFormat(question.id, 'pi')}
-                                        >
-                                          Pi
-                                          <span className="ml-1">π</span>
-                                        </Button>
-                                        <Button 
-                                          variant="outline" 
-                                          size="sm" 
-                                          className="w-full"
-                                          onClick={() => insertTextFormat(question.id, 'theta')}
-                                        >
-                                          Theta
-                                          <span className="ml-1">θ</span>
-                                        </Button>
-                                      </div>
-                                      <div className="grid grid-cols-2 gap-2">
-                                        <Button 
-                                          variant="outline" 
-                                          size="sm" 
-                                          className="w-full"
-                                          onClick={() => insertTextFormat(question.id, 'delta')}
-                                        >
-                                          Delta
-                                          <span className="ml-1">Δ</span>
-                                        </Button>
-                                        <Button 
-                                          variant="outline" 
-                                          size="sm" 
-                                          className="w-full"
-                                          onClick={() => insertTextFormat(question.id, 'infinity')}
-                                        >
-                                          Infinity
-                                          <span className="ml-1">∞</span>
-                                        </Button>
-                                      </div>
-                                      <p className="text-xs text-muted-foreground mt-1">
-                                        Format will be applied at cursor position or end of text
-                                      </p>
-                                    </div>
-                                  </PopoverContent>
-                                </Popover>
+                                {renderFormattingButton(question)}
                               </div>
                             </div>
                             

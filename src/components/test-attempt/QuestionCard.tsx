@@ -41,6 +41,11 @@ export const QuestionCard = ({
     }
   };
 
+  // Function to safely render HTML content
+  const renderHTML = (htmlContent: string) => {
+    return { __html: htmlContent };
+  };
+
   return (
     <div className="glass-card p-4 sm:p-6 rounded-lg w-full overflow-x-hidden">
       <div className="mb-4 sm:mb-6">
@@ -51,7 +56,7 @@ export const QuestionCard = ({
           </span>
         </div>
         <div className="mt-2 text-base sm:text-lg break-words">
-          <p className="whitespace-pre-wrap">{currentQuestion.question_text}</p>
+          <p className="whitespace-pre-wrap" dangerouslySetInnerHTML={renderHTML(currentQuestion.question_text)}></p>
         </div>
       </div>
       
@@ -79,8 +84,8 @@ export const QuestionCard = ({
                 <label 
                   htmlFor={`option-${index}`}
                   className="cursor-pointer flex-grow text-sm sm:text-base whitespace-pre-wrap"
+                  dangerouslySetInnerHTML={renderHTML(option)}
                 >
-                  {option}
                 </label>
               </div>
             ))}

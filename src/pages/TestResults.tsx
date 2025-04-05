@@ -15,31 +15,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-
-type Question = {
-  id: string;
-  question_text: string;
-  question_type: string;
-  options: string[] | null;
-  marks: number;
-  correct_answer: string;
-};
-
-type TestAnswer = {
-  question_id: string;
-  student_answer: string | null;
-  is_correct: boolean | null;
-};
-
-type RankingEntry = {
-  student_name: string | null;
-  roll_number: string | null;
-  score: number;
-  total_possible: number;
-  percentage: number;
-  rank?: number;
-  id: string; // attempt id
-};
+import { 
+  fetchTestResultsData, 
+  getPerformanceSummary, 
+  downloadResults, 
+  getCorrectAnswerText,
+  getQuestionResult,
+  Question,
+  TestAnswer,
+  RankingEntry
+} from '@/hooks/test-attempt/resultsUtils';
 
 const TestResults = () => {
   const { id } = useParams<{ id: string }>();
@@ -67,93 +52,20 @@ const TestResults = () => {
   }, []);
 
   useEffect(() => {
-    const fetchResults = async () => {
+    const loadResults = async () => {
       if (!id) return;
 
       try {
         setIsLoading(true);
         
-        // Optimize data fetching by only getting what we need based on view type
-        if (attemptId) {
-          // Fetch specific attempt data
-          const { data: attemptData, error: attemptError } = await supabase
-            .from('test_attempts')
-            .select('*, test:tests(*)')
-            .eq('id', attemptId)
-            .single();
-          
-          if (attemptError) throw attemptError;
-          setAttempt(attemptData);
-          setTest(attemptData.test);
-          
-          // Fetch answers for this attempt
-          const { data: answersData, error: answersError } = await supabase
-            .from('test_answers')
-            .select('*')
-            .eq('attempt_id', attemptId);
-          
-          if (answersError) throw answersError;
-          setAnswers(answersData);
-          
-          // Only fetch questions for this test if we have an attempt
-          const { data: questionsData, error: questionsError } = await supabase
-            .from('test_questions')
-            .select('*')
-            .eq('test_id', id)
-            .order('created_at', { ascending: true });
-          
-          if (questionsError) throw questionsError;
-          
-          // Parse options once to avoid repeated parsing
-          const formattedQuestions: Question[] = questionsData.map((q: any) => ({
-            id: q.id,
-            question_text: q.question_text,
-            question_type: q.question_type,
-            options: parseOptions(q.options),
-            marks: q.marks,
-            correct_answer: q.correct_answer
-          }));
-          
-          setQuestions(formattedQuestions);
-        } else {
-          // Only fetch test info if we don't have an attempt (admin view)
-          const { data: testData, error: testError } = await supabase
-            .from('tests')
-            .select('*')
-            .eq('id', id)
-            .single();
-          
-          if (testError) throw testError;
-          setTest(testData);
-          
-          // If admin, fetch student rankings
-          if (isAdmin) {
-            const { data: rankingsData, error: rankingsError } = await supabase
-              .from('test_attempts')
-              .select('id, student_name, roll_number, score, total_possible')
-              .eq('test_id', id)
-              .eq('status', 'completed')
-              .order('score', { ascending: false });
-            
-            if (rankingsError) throw rankingsError;
-            
-            // Calculate percentage scores and assign ranks
-            if (rankingsData) {
-              const formattedRankings: RankingEntry[] = rankingsData.map((r: any, index: number) => ({
-                id: r.id,
-                student_name: r.student_name || 'Anonymous',
-                roll_number: r.roll_number || 'N/A',
-                score: r.score || 0,
-                total_possible: r.total_possible || 0,
-                percentage: r.total_possible ? Math.round((r.score / r.total_possible) * 100) : 0,
-                rank: index + 1
-              }));
-              
-              setRankings(formattedRankings);
-              setStudentAttempts(formattedRankings);
-            }
-          }
-        }
+        const results = await fetchTestResultsData(id, attemptId, isAdmin);
+        
+        setTest(results.test);
+        setQuestions(results.questions);
+        setAnswers(results.answers);
+        setRankings(results.rankings);
+        setStudentAttempts(results.studentAttempts);
+        setAttempt(results.attempt);
         
         setIsLoading(false);
       } catch (error: any) {
@@ -162,23 +74,8 @@ const TestResults = () => {
       }
     };
     
-    fetchResults();
+    loadResults();
   }, [id, attemptId, isAdmin]);
-
-  // Helper function to parse options consistently
-  const parseOptions = (options: any): string[] | null => {
-    if (!options) return null;
-    
-    try {
-      if (Array.isArray(options)) return options;
-      if (typeof options === 'string') return JSON.parse(options);
-      return Array.isArray(JSON.parse(JSON.stringify(options))) ? 
-        JSON.parse(JSON.stringify(options)) : null;
-    } catch (e) {
-      console.error("Error parsing options:", e);
-      return null;
-    }
-  };
 
   // Memoize calculated values to avoid recalculating on each render
   const score = useMemo(() => {
@@ -207,65 +104,8 @@ const TestResults = () => {
     return foundRank || null;
   }, [rankings, attempt]);
 
-  const getPerformanceSummary = () => {
-    const { percentage } = score;
-    
-    if (percentage >= 90) return "Outstanding! You have excellent understanding of the subject.";
-    if (percentage >= 80) return "Great job! You have very good knowledge of the material.";
-    if (percentage >= 70) return "Good work! You have a solid understanding of most concepts.";
-    if (percentage >= test?.passing_percent) return "You've passed! Continue to strengthen your knowledge in weaker areas.";
-    return "You didn't pass this time. Review the material and try again.";
-  };
-
-  const getQuestionResult = (questionId: string) => {
-    const answer = answers.find(a => a.question_id === questionId);
-    if (!answer) return { answered: false, isCorrect: false, answer: null };
-    
-    return {
-      answered: answer.student_answer !== null,
-      isCorrect: answer.is_correct === true,
-      answer: answer.student_answer
-    };
-  };
-  
-  const getCorrectAnswerText = (question: Question) => {
-    if (question.question_type === 'multiple_choice' && question.options) {
-      const options = question.options;
-      const correctOption = options[parseInt(question.correct_answer)];
-      return correctOption || question.correct_answer;
-    }
-    
-    return question.correct_answer;
-  };
-  
-  const downloadResults = () => {
-    if (!test || !questions.length) return;
-    
-    let content = `Test Results: ${test.title}\n`;
-    content += `Subject: ${test.subject}\n`;
-    content += `Student: ${attempt.student_name || 'Anonymous'}\n`;
-    content += `Score: ${score.score}/${score.total} (${score.percentage}%)\n`;
-    content += `Status: ${isPassed ? 'PASSED' : 'FAILED'}\n\n`;
-    content += `Question Details:\n\n`;
-    
-    questions.forEach((q, index) => {
-      const { answered, isCorrect, answer } = getQuestionResult(q.id);
-      
-      content += `Q${index + 1}: ${q.question_text}\n`;
-      content += `Your Answer: ${answered ? answer : 'Not answered'}\n`;
-      content += `Correct Answer: ${getCorrectAnswerText(q)}\n`;
-      content += `Result: ${answered ? (isCorrect ? 'Correct' : 'Incorrect') : 'Not answered'}\n\n`;
-    });
-    
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `test_results_${test.title.replace(/\s+/g, '_')}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const handleDownloadResults = () => {
+    downloadResults(test, attempt, questions, answers, score);
   };
   
   const viewStudentAttempt = (attemptId: string) => {
@@ -470,12 +310,12 @@ const TestResults = () => {
         
         <div className="p-4 rounded-md bg-primary/5 border border-primary/10">
           <p className="text-md">
-            {getPerformanceSummary()}
+            {getPerformanceSummary(score.percentage, test.passing_percent || 0)}
           </p>
         </div>
         
         <div className="flex justify-end">
-          <Button onClick={downloadResults}>
+          <Button onClick={handleDownloadResults}>
             <Download className="h-4 w-4 mr-2" />
             Download Results
           </Button>
@@ -488,7 +328,7 @@ const TestResults = () => {
         
         <div className="space-y-8">
           {questions.map((question, index) => {
-            const { answered, isCorrect, answer } = getQuestionResult(question.id);
+            const { answered, isCorrect, answer } = getQuestionResult(question.id, answers);
             
             return (
               <div 

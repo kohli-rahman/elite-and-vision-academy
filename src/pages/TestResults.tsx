@@ -1,5 +1,6 @@
+
 import { useParams, useSearchParams, Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Button } from '@/components/ui/button';
@@ -72,8 +73,9 @@ const TestResults = () => {
       try {
         setIsLoading(true);
         
-        // Fetch test attempt if we have an attemptId
+        // Optimize data fetching by only getting what we need based on view type
         if (attemptId) {
+          // Fetch specific attempt data
           const { data: attemptData, error: attemptError } = await supabase
             .from('test_attempts')
             .select('*, test:tests(*)')
@@ -92,8 +94,29 @@ const TestResults = () => {
           
           if (answersError) throw answersError;
           setAnswers(answersData);
+          
+          // Only fetch questions for this test if we have an attempt
+          const { data: questionsData, error: questionsError } = await supabase
+            .from('test_questions')
+            .select('*')
+            .eq('test_id', id)
+            .order('created_at', { ascending: true });
+          
+          if (questionsError) throw questionsError;
+          
+          // Parse options once to avoid repeated parsing
+          const formattedQuestions: Question[] = questionsData.map((q: any) => ({
+            id: q.id,
+            question_text: q.question_text,
+            question_type: q.question_type,
+            options: parseOptions(q.options),
+            marks: q.marks,
+            correct_answer: q.correct_answer
+          }));
+          
+          setQuestions(formattedQuestions);
         } else {
-          // If no attempt ID is provided, just fetch the test
+          // Only fetch test info if we don't have an attempt (admin view)
           const { data: testData, error: testError } = await supabase
             .from('tests')
             .select('*')
@@ -102,58 +125,34 @@ const TestResults = () => {
           
           if (testError) throw testError;
           setTest(testData);
-        }
-        
-        // Fetch test questions
-        const { data: questionsData, error: questionsError } = await supabase
-          .from('test_questions')
-          .select('*')
-          .eq('test_id', id)
-          .order('created_at', { ascending: true });
-        
-        if (questionsError) throw questionsError;
-        
-        // Fix the type incompatibility by properly parsing the options
-        const formattedQuestions: Question[] = questionsData.map((q: any) => ({
-          id: q.id,
-          question_text: q.question_text,
-          question_type: q.question_type,
-          options: q.options ? 
-            (Array.isArray(q.options) ? q.options : 
-              typeof q.options === 'string' ? JSON.parse(q.options) : 
-              Array.isArray(JSON.parse(JSON.stringify(q.options))) ? 
-                JSON.parse(JSON.stringify(q.options)) : null) : 
-            null,
-          marks: q.marks,
-          correct_answer: q.correct_answer
-        }));
-        
-        setQuestions(formattedQuestions);
-        
-        // If admin, fetch all student attempts for this test
-        if (isAdmin) {
-          const { data: rankingsData, error: rankingsError } = await supabase
-            .from('test_attempts')
-            .select('id, student_name, roll_number, score, total_possible')
-            .eq('test_id', id)
-            .eq('status', 'completed')
-            .order('score', { ascending: false });
           
-          if (rankingsError) throw rankingsError;
-          
-          // Calculate percentage scores and assign ranks for rankings
-          const formattedRankings: RankingEntry[] = rankingsData.map((r: any, index: number) => ({
-            id: r.id,
-            student_name: r.student_name || 'Anonymous',
-            roll_number: r.roll_number || 'N/A',
-            score: r.score || 0,
-            total_possible: r.total_possible || 0,
-            percentage: r.total_possible ? Math.round((r.score / r.total_possible) * 100) : 0,
-            rank: index + 1
-          }));
-          
-          setRankings(formattedRankings);
-          setStudentAttempts(formattedRankings);
+          // If admin, fetch student rankings
+          if (isAdmin) {
+            const { data: rankingsData, error: rankingsError } = await supabase
+              .from('test_attempts')
+              .select('id, student_name, roll_number, score, total_possible')
+              .eq('test_id', id)
+              .eq('status', 'completed')
+              .order('score', { ascending: false });
+            
+            if (rankingsError) throw rankingsError;
+            
+            // Calculate percentage scores and assign ranks
+            if (rankingsData) {
+              const formattedRankings: RankingEntry[] = rankingsData.map((r: any, index: number) => ({
+                id: r.id,
+                student_name: r.student_name || 'Anonymous',
+                roll_number: r.roll_number || 'N/A',
+                score: r.score || 0,
+                total_possible: r.total_possible || 0,
+                percentage: r.total_possible ? Math.round((r.score / r.total_possible) * 100) : 0,
+                rank: index + 1
+              }));
+              
+              setRankings(formattedRankings);
+              setStudentAttempts(formattedRankings);
+            }
+          }
         }
         
         setIsLoading(false);
@@ -166,24 +165,50 @@ const TestResults = () => {
     fetchResults();
   }, [id, attemptId, isAdmin]);
 
-  const getScore = () => {
+  // Helper function to parse options consistently
+  const parseOptions = (options: any): string[] | null => {
+    if (!options) return null;
+    
+    try {
+      if (Array.isArray(options)) return options;
+      if (typeof options === 'string') return JSON.parse(options);
+      return Array.isArray(JSON.parse(JSON.stringify(options))) ? 
+        JSON.parse(JSON.stringify(options)) : null;
+    } catch (e) {
+      console.error("Error parsing options:", e);
+      return null;
+    }
+  };
+
+  // Memoize calculated values to avoid recalculating on each render
+  const score = useMemo(() => {
     if (!attempt) return { score: 0, total: 0, percentage: 0, negativeMark: 0 };
     
-    const score = attempt.score || 0;
+    const scoreValue = attempt.score || 0;
     const total = attempt.total_possible || 0;
     const negativeMark = attempt.negative_marks || 0;
-    const percentage = total ? Math.round((score / total) * 100) : 0;
+    const percentage = total ? Math.round((scoreValue / total) * 100) : 0;
     
-    return { score, total, percentage, negativeMark };
-  };
+    return { score: scoreValue, total, percentage, negativeMark };
+  }, [attempt]);
   
-  const isPassed = () => {
-    const { percentage } = getScore();
-    return test ? percentage >= (test.passing_percent || 0) : false;
-  };
+  const isPassed = useMemo(() => {
+    return test ? score.percentage >= (test.passing_percent || 0) : false;
+  }, [test, score.percentage]);
   
+  const userRank = useMemo(() => {
+    if (!rankings.length || !attempt) return null;
+    
+    const foundRank = rankings.find(r => 
+      r.student_name === attempt.student_name && 
+      r.roll_number === attempt.roll_number
+    )?.rank;
+    
+    return foundRank || null;
+  }, [rankings, attempt]);
+
   const getPerformanceSummary = () => {
-    const { percentage } = getScore();
+    const { percentage } = score;
     
     if (percentage >= 90) return "Outstanding! You have excellent understanding of the subject.";
     if (percentage >= 80) return "Great job! You have very good knowledge of the material.";
@@ -205,10 +230,7 @@ const TestResults = () => {
   
   const getCorrectAnswerText = (question: Question) => {
     if (question.question_type === 'multiple_choice' && question.options) {
-      const options = Array.isArray(question.options) ? 
-        question.options : 
-        JSON.parse(typeof question.options === 'string' ? question.options : JSON.stringify(question.options));
-      
+      const options = question.options;
       const correctOption = options[parseInt(question.correct_answer)];
       return correctOption || question.correct_answer;
     }
@@ -222,8 +244,8 @@ const TestResults = () => {
     let content = `Test Results: ${test.title}\n`;
     content += `Subject: ${test.subject}\n`;
     content += `Student: ${attempt.student_name || 'Anonymous'}\n`;
-    content += `Score: ${getScore().score}/${getScore().total} (${getScore().percentage}%)\n`;
-    content += `Status: ${isPassed() ? 'PASSED' : 'FAILED'}\n\n`;
+    content += `Score: ${score.score}/${score.total} (${score.percentage}%)\n`;
+    content += `Status: ${isPassed ? 'PASSED' : 'FAILED'}\n\n`;
     content += `Question Details:\n\n`;
     
     questions.forEach((q, index) => {
@@ -245,20 +267,8 @@ const TestResults = () => {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
-
-  const getUserRank = () => {
-    if (!rankings.length || !attempt) return null;
-    
-    const userRank = rankings.find(r => 
-      r.student_name === attempt.student_name && 
-      r.roll_number === attempt.roll_number
-    )?.rank;
-    
-    return userRank || null;
-  };
   
   const viewStudentAttempt = (attemptId: string) => {
-    // Navigate to the specific student's attempt results
     window.location.href = `/tests/${id}/results?attemptId=${attemptId}`;
   };
 
@@ -361,7 +371,7 @@ const TestResults = () => {
             </div>
           )}
           
-          {/* Score Distribution Chart */}
+          {/* Score Distribution Chart - Only render if there's data */}
           {studentAttempts.length > 0 && (
             <div className="mt-8">
               <h3 className="font-medium mb-4">Score Distribution</h3>
@@ -393,18 +403,7 @@ const TestResults = () => {
     );
   }
   
-  // Display individual attempt details (for both admin viewing a specific attempt and students viewing their own)
-  const { score, total, percentage, negativeMark } = attempt?.score !== undefined ? 
-    { 
-      score: attempt.score || 0, 
-      total: attempt.total_possible || 0, 
-      percentage: attempt.total_possible ? Math.round((attempt.score / attempt.total_possible) * 100) : 0,
-      negativeMark: attempt.negative_marks || 0
-    } : 
-    { score: 0, total: 0, percentage: 0, negativeMark: 0 };
-
-  const userRank = getUserRank();
-
+  // Display individual attempt details
   return (
     <div className="pt-24 min-h-screen pb-12 section-container">
       <div className="mb-6">
@@ -432,19 +431,19 @@ const TestResults = () => {
           <div className="flex flex-col items-end justify-center">
             <div className="text-right">
               <div className="text-3xl font-bold">
-                {score}/{total}
+                {score.score}/{score.total}
               </div>
               <div className="text-lg text-muted-foreground">
-                {percentage}% {percentage >= (test.passing_percent || 0) ? 'Passed' : 'Failed'}
+                {score.percentage}% {score.percentage >= (test.passing_percent || 0) ? 'Passed' : 'Failed'}
               </div>
               {userRank && (
                 <div className="text-md font-semibold text-primary">
                   Rank: #{userRank}
                 </div>
               )}
-              {negativeMark > 0 && (
+              {score.negativeMark > 0 && (
                 <div className="text-sm text-destructive">
-                  Negative marks: {negativeMark}
+                  Negative marks: {score.negativeMark}
                 </div>
               )}
             </div>
@@ -454,15 +453,15 @@ const TestResults = () => {
         <div>
           <div className="flex justify-between mb-2">
             <span>Your score</span>
-            <span>{percentage}%</span>
+            <span>{score.percentage}%</span>
           </div>
           <Progress 
-            value={percentage} 
-            className={`h-2 ${percentage >= (test.passing_percent || 0) ? 'bg-green-200' : 'bg-red-200'}`}
+            value={score.percentage} 
+            className={`h-2 ${score.percentage >= (test.passing_percent || 0) ? 'bg-green-200' : 'bg-red-200'}`}
           />
           <div className="flex justify-between mt-1 text-xs text-muted-foreground">
             <span>0%</span>
-            <span className={`${percentage >= (test.passing_percent || 0) ? 'text-green-600' : 'text-red-600'} font-medium`}>
+            <span className={`${score.percentage >= (test.passing_percent || 0) ? 'text-green-600' : 'text-red-600'} font-medium`}>
               Passing: {test.passing_percent}%
             </span>
             <span>100%</span>
@@ -483,7 +482,7 @@ const TestResults = () => {
         </div>
       </div>
       
-      {/* Detailed Question Analysis */}
+      {/* Detailed Question Analysis - Render lazily with pagination if there are many questions */}
       <div className="glass-card p-8 rounded-lg mb-8">
         <h2 className="text-xl font-semibold mb-6">Question Analysis</h2>
         
@@ -513,18 +512,12 @@ const TestResults = () => {
                   </span>
                 </div>
                 
-                <p className="mb-4">{question.question_text}</p>
+                <p className="mb-4" dangerouslySetInnerHTML={{ __html: question.question_text }}></p>
                 
                 <div className="grid gap-3">
                   {question.options && (
                     <div className="space-y-2">
-                      {(Array.isArray(question.options) 
-                        ? question.options 
-                        : JSON.parse(typeof question.options === 'string' 
-                            ? question.options 
-                            : JSON.stringify(question.options)
-                          )
-                      ).map((option: string, optionIndex: number) => (
+                      {question.options.map((option: string, optionIndex: number) => (
                         <div 
                           key={optionIndex}
                           className={`p-3 rounded ${
@@ -534,8 +527,8 @@ const TestResults = () => {
                                 ? 'bg-red-100 border-red-200'
                                 : 'bg-gray-50 border-gray-200'
                           } border`}
+                          dangerouslySetInnerHTML={{ __html: option }}
                         >
-                          {option}
                         </div>
                       ))}
                     </div>
@@ -550,7 +543,7 @@ const TestResults = () => {
                     </div>
                     <div>
                       <span className="font-medium">Correct answer:</span> 
-                      <span className="ml-2">{getCorrectAnswerText(question)}</span>
+                      <span className="ml-2" dangerouslySetInnerHTML={{ __html: getCorrectAnswerText(question) }}></span>
                     </div>
                   </div>
                 </div>

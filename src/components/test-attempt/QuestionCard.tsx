@@ -41,11 +41,6 @@ export const QuestionCard = ({
     }
   };
 
-  // Function to safely render HTML content
-  const renderHTML = (htmlContent: string) => {
-    return { __html: htmlContent };
-  };
-
   return (
     <div className="glass-card p-4 sm:p-6 rounded-lg w-full overflow-x-hidden">
       <div className="mb-4 sm:mb-6">
@@ -56,7 +51,7 @@ export const QuestionCard = ({
           </span>
         </div>
         <div className="mt-2 text-base sm:text-lg break-words">
-          <p className="whitespace-pre-wrap" dangerouslySetInnerHTML={renderHTML(currentQuestion.question_text)}></p>
+          <p className="whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: currentQuestion.question_text }}></p>
         </div>
       </div>
       
@@ -67,24 +62,24 @@ export const QuestionCard = ({
               <div 
                 key={index}
                 className={`flex items-start p-3 border rounded-lg cursor-pointer transition-colors break-words ${
-                  currentAnswer === option 
+                  currentAnswer === index.toString() 
                     ? 'border-primary bg-primary/5' 
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
-                onClick={() => updateAnswer(currentQuestion.id, option)}
+                onClick={() => updateAnswer(currentQuestion.id, index.toString())}
               >
                 <input 
                   type="radio" 
                   id={`option-${index}`}
                   name={`question-${currentQuestion.id}`}
-                  checked={currentAnswer === option}
-                  onChange={() => updateAnswer(currentQuestion.id, option)}
+                  checked={currentAnswer === index.toString()}
+                  onChange={() => updateAnswer(currentQuestion.id, index.toString())}
                   className="mr-3 mt-1 flex-shrink-0"
                 />
                 <label 
                   htmlFor={`option-${index}`}
                   className="cursor-pointer flex-grow text-sm sm:text-base whitespace-pre-wrap"
-                  dangerouslySetInnerHTML={renderHTML(option)}
+                  dangerouslySetInnerHTML={{ __html: option }}
                 >
                 </label>
               </div>

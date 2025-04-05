@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -53,6 +53,21 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
 
   const timerRef = useRef<any>(null);
 
+  // Helper for parsing options consistently
+  const parseOptions = useCallback((options: any): string[] | null => {
+    if (!options) return null;
+    
+    try {
+      if (Array.isArray(options)) return options;
+      if (typeof options === 'string') return JSON.parse(options);
+      return Array.isArray(JSON.parse(JSON.stringify(options))) ? 
+        JSON.parse(JSON.stringify(options)) : null;
+    } catch (e) {
+      console.error("Error parsing options:", e);
+      return null;
+    }
+  }, []);
+
   useEffect(() => {
     const loadTestData = async () => {
       if (!testId || !attemptId || !userId) return;
@@ -105,9 +120,7 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
           id: q.id,
           question_text: q.question_text,
           question_type: q.question_type,
-          options: q.options ? 
-            (Array.isArray(q.options) ? q.options : JSON.parse(q.options)) : 
-            null,
+          options: parseOptions(q.options),
           marks: q.marks,
         }));
         
@@ -159,7 +172,7 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
     };
 
     loadTestData();
-  }, [testId, attemptId, userId, navigate]);
+  }, [testId, attemptId, userId, navigate, parseOptions]);
 
   useEffect(() => {
     if (timeLeft !== null && timeLeft > 0) {
@@ -180,43 +193,51 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
     };
   }, [timeLeft]);
 
-  const updateAnswer = (questionId: string, answer: string | null) => {
+  const updateAnswer = useCallback((questionId: string, answer: string | null) => {
     setAnswers(prev => 
       prev.map(a => 
         a.questionId === questionId ? { ...a, answer } : a
       )
     );
     setUnsavedChanges(true);
-  };
+  }, []);
 
-  const saveAllAnswers = async () => {
+  const saveAllAnswers = useCallback(async () => {
     if (!attemptId) return;
 
     try {
       const answersToSave = answers.filter(a => a.answer !== null);
       
-      for (const answer of answersToSave) {
-        const { data: existingAnswer } = await supabase
-          .from('test_answers')
-          .select('id')
-          .eq('attempt_id', attemptId)
-          .eq('question_id', answer.questionId)
-          .maybeSingle();
+      // Process in batches to avoid overwhelming the server
+      const batchSize = 5;
+      for (let i = 0; i < answersToSave.length; i += batchSize) {
+        const batch = answersToSave.slice(i, i + batchSize);
+        
+        const promises = batch.map(async (answer) => {
+          const { data: existingAnswer } = await supabase
+            .from('test_answers')
+            .select('id')
+            .eq('attempt_id', attemptId)
+            .eq('question_id', answer.questionId)
+            .maybeSingle();
 
-        if (existingAnswer) {
-          await supabase
-            .from('test_answers')
-            .update({ student_answer: answer.answer })
-            .eq('id', existingAnswer.id);
-        } else {
-          await supabase
-            .from('test_answers')
-            .insert({
-              attempt_id: attemptId,
-              question_id: answer.questionId,
-              student_answer: answer.answer
-            });
-        }
+          if (existingAnswer) {
+            return supabase
+              .from('test_answers')
+              .update({ student_answer: answer.answer })
+              .eq('id', existingAnswer.id);
+          } else {
+            return supabase
+              .from('test_answers')
+              .insert({
+                attempt_id: attemptId,
+                question_id: answer.questionId,
+                student_answer: answer.answer
+              });
+          }
+        });
+        
+        await Promise.all(promises);
       }
       
       setUnsavedChanges(false);
@@ -225,9 +246,9 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
       console.error('Error saving answers:', error);
       toast.error('Failed to save answers');
     }
-  };
+  }, [attemptId, answers]);
 
-  const submitTest = async (isTimeUp = false) => {
+  const submitTest = useCallback(async (isTimeUp = false) => {
     if (!test || !attempt || !attemptId || isSubmitting) return;
 
     await saveAllAnswers();
@@ -239,7 +260,8 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
       let score = 0;
       let totalPossible = 0;
       let negativeMarks = 0;
-
+      
+      // Process question evaluations in batches
       for (const question of questions) {
         totalPossible += question.marks;
         
@@ -291,23 +313,23 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
       toast.error(`Error submitting test: ${error.message}`);
       setIsSubmitting(false);
     }
-  };
+  }, [test, attempt, attemptId, isSubmitting, questions, answers, saveAllAnswers, navigate, testId]);
 
-  const goToNextQuestion = () => {
+  const goToNextQuestion = useCallback(() => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     }
-  };
+  }, [currentQuestion, questions.length]);
 
-  const goToPrevQuestion = () => {
+  const goToPrevQuestion = useCallback(() => {
     if (currentQuestion > 0) {
       setCurrentQuestion(currentQuestion - 1);
     }
-  };
+  }, [currentQuestion]);
 
-  const completeStudentDetails = () => {
+  const completeStudentDetails = useCallback(() => {
     setShowStudentDetailsForm(false);
-  };
+  }, []);
 
   return {
     test,

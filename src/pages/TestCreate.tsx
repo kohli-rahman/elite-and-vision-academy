@@ -1,7 +1,17 @@
+import { 
+  PlusCircle, 
+  MinusCircle, 
+  Check, 
+  Save, 
+  ArrowLeft, 
+  AlertCircle, 
+  Superscript, 
+  SquareRoot2 
+} from 'lucide-react';
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { PlusCircle, MinusCircle, Check, Save, ArrowLeft, AlertCircle, Superscript, SquareRoot } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -565,7 +575,7 @@ const TestCreate = () => {
       }}>
         <PopoverTrigger asChild>
           <Button variant="ghost" size="sm" className="p-1 h-auto">
-            <SquareRoot className="h-4 w-4" />
+            <SquareRoot2 className="h-4 w-4" />
           </Button>
         </PopoverTrigger>
         {renderFormattingPopover(question)}

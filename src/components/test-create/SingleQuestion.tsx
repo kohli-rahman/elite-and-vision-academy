@@ -53,6 +53,11 @@ const SingleQuestion = ({
     }
   };
 
+  // Function to safely render HTML content for preview
+  const renderHTML = (htmlContent: string) => {
+    return { __html: htmlContent };
+  };
+
   return (
     <div className="p-4 border rounded-lg bg-card">
       <div className="flex justify-between items-start mb-4">
@@ -91,6 +96,17 @@ const SingleQuestion = ({
             className="mt-1"
             required
           />
+          
+          {question.question_text && (
+            <div className="mt-2 p-2 border rounded bg-muted/20">
+              <p className="text-sm font-medium mb-1">Preview:</p>
+              <div 
+                className="text-sm" 
+                dangerouslySetInnerHTML={renderHTML(question.question_text)}
+              ></div>
+            </div>
+          )}
+          
           <div className="mt-1 flex gap-2 text-xs text-muted-foreground">
             <div className="flex items-center">
               <span>Example: Energy = mc<sup>2</sup> is written as "Energy = mc<strong>&lt;sup&gt;</strong>2<strong>&lt;/sup&gt;</strong>"</span>

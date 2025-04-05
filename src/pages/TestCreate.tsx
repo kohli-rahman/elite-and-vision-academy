@@ -143,13 +143,13 @@ const TestCreate = () => {
     
     switch (format) {
       case 'superscript':
-        formattedText = '<sup>text</sup>';
+        formattedText = '<sup>2</sup>';
         break;
       case 'subscript':
-        formattedText = '<sub>text</sub>';
+        formattedText = '<sub>2</sub>';
         break;
       case 'fraction':
-        formattedText = '<div class="fraction"><span class="numerator">a</span><span class="denominator">b</span></div>';
+        formattedText = '<div class="fraction" style="display: inline-block;"><span class="numerator">a</span><span class="denominator">b</span></div>';
         break;
       case 'sqrt':
         formattedText = '<span class="math-root"><span class="math-root-symbol">√</span><span>x</span></span>';
@@ -161,7 +161,7 @@ const TestCreate = () => {
         formattedText = '<span><sup>n</sup><span class="math-root"><span class="math-root-symbol">√</span><span>x</span></span></span>';
         break;
       case 'sqrtfraction':
-        formattedText = '<span class="math-root"><span class="math-root-symbol">√</span><span><div class="fraction"><span class="numerator">a</span><span class="denominator">b</span></div></span></span>';
+        formattedText = '<span class="math-root"><span class="math-root-symbol">√</span><span><div class="fraction" style="display: inline-block;"><span class="numerator">a</span><span class="denominator">b</span></div></span></span>';
         break;
       case 'radical':
         formattedText = '<span class="math-root"><span class="math-root-symbol">√</span><span>a + b</span></span>';

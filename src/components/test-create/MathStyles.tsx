@@ -37,6 +37,14 @@ const MathStyles = () => {
       .denominator {
         padding: 0 3px;
       }
+      sup {
+        vertical-align: super;
+        font-size: smaller;
+      }
+      sub {
+        vertical-align: sub;
+        font-size: smaller;
+      }
     `;
     document.head.appendChild(style);
     

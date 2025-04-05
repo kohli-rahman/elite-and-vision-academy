@@ -13,8 +13,20 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 
+// Define the form values type to match the type in TestCreate.tsx
+export type TestFormValues = {
+  title: string;
+  description: string;
+  subject: string;
+  duration: number;
+  passing_percent: number;
+  is_published: boolean;
+  negative_marking: boolean;
+  negative_marks_percent: number;
+};
+
 type TestDetailsFormProps = {
-  form: ReturnType<typeof useForm>;
+  form: ReturnType<typeof useForm<TestFormValues>>;
 };
 
 const TestDetailsForm = ({ form }: TestDetailsFormProps) => {

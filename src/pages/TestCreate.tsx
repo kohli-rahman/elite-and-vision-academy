@@ -17,7 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 
 // Import refactored components
-import TestDetailsForm from '@/components/test-create/TestDetailsForm';
+import TestDetailsForm, { TestFormValues } from '@/components/test-create/TestDetailsForm';
 import QuestionsForm from '@/components/test-create/QuestionsForm';
 import TestCreationTips from '@/components/test-create/TestCreationTips';
 import MathStyles from '@/components/test-create/MathStyles';
@@ -41,7 +41,7 @@ const TestCreate = () => {
   const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
   const [showFormatting, setShowFormatting] = useState(false);
   
-  const form = useForm({
+  const form = useForm<TestFormValues>({
     defaultValues: {
       title: '',
       description: '',
@@ -191,7 +191,7 @@ const TestCreate = () => {
     setShowFormatting(false);
   };
 
-  const onSubmit = async (formData: any) => {
+  const onSubmit = async (formData: TestFormValues) => {
     if (!user) {
       toast.error('You must be logged in to create a test');
       return;

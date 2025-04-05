@@ -11,6 +11,7 @@ import { QuestionCard } from '@/components/test-attempt/QuestionCard';
 import { QuestionNavigation } from '@/components/test-attempt/QuestionNavigation';
 import { useTestAttempt } from '@/hooks/useTestAttempt';
 import { useIsMobile } from '@/hooks/use-mobile';
+import MathStyles from '@/components/test-create/MathStyles';
 
 const TestAttempt = () => {
   const { id } = useParams<{ id: string }>();
@@ -34,51 +35,6 @@ const TestAttempt = () => {
     
     checkSession();
   }, [navigate]);
-
-  // Add CSS for math formatting
-  useEffect(() => {
-    // Add CSS for mathematical expressions
-    const style = document.createElement('style');
-    style.textContent = `
-      .math-root {
-        position: relative;
-        display: inline-flex;
-        align-items: center;
-      }
-      .math-root:before {
-        content: "";
-        border-top: 1px solid currentColor;
-        position: absolute;
-        top: 0;
-        left: 0.7em;
-        right: 0;
-      }
-      .math-root-symbol {
-        margin-right: 2px;
-      }
-      .fraction {
-        display: inline-block;
-        vertical-align: middle;
-        text-align: center;
-        margin: 0 0.2em;
-      }
-      .numerator, .denominator {
-        display: block;
-      }
-      .numerator {
-        border-bottom: 1px solid;
-        padding: 0 3px;
-      }
-      .denominator {
-        padding: 0 3px;
-      }
-    `;
-    document.head.appendChild(style);
-    
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
 
   const {
     test,
@@ -149,6 +105,9 @@ const TestAttempt = () => {
 
   return (
     <div className="pt-16 min-h-screen pb-12 section-container">
+      {/* Use the MathStyles component here too for consistency */}
+      <MathStyles />
+      
       <TestHeader 
         test={test}
         timeLeft={timeLeft}

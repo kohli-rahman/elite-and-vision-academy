@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -26,6 +25,7 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
   const [showStudentDetailsForm, setShowStudentDetailsForm] = useState(true);
   const [initialTimeLeft, setInitialTimeLeft] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [autoSubmitTriggered, setAutoSubmitTriggered] = useState(false);
 
   // Use the extracted utility hooks
   const { 
@@ -92,8 +92,13 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
   }, [testId, attemptId, userId, navigate, updateAnswer, resetUnsavedChanges]);
 
   const handleTimeExpired = useCallback(() => {
-    submitTest(true);
-  }, []);
+    console.log("Time expired callback triggered");
+    if (!autoSubmitTriggered && !isSubmitting) {
+      setAutoSubmitTriggered(true);
+      toast.info("Time's up! Submitting your test...");
+      submitTest(true);
+    }
+  }, [autoSubmitTriggered, isSubmitting]);
 
   const { timeLeft } = useTestTimer(initialTimeLeft, handleTimeExpired);
 
@@ -114,12 +119,14 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
   // Submit test
   const submitTest = useCallback(async (isTimeUp = false) => {
     if (!test || !attempt || !attemptId || isSubmitting) return;
-
-    await saveAllAnswers();
     
+    console.log("Submitting test, isTimeUp:", isTimeUp);
     setIsSubmitting(true);
 
     try {
+      await saveAnswers(attemptId, answers);
+      resetUnsavedChanges();
+      
       await evaluateAndSubmitTest(attemptId, test, questions, answers);
 
       if (isTimeUp) {
@@ -134,7 +141,7 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
       toast.error(`Error submitting test: ${error.message}`);
       setIsSubmitting(false);
     }
-  }, [test, attempt, attemptId, isSubmitting, questions, answers, saveAllAnswers, navigate, testId]);
+  }, [test, attempt, attemptId, isSubmitting, questions, answers, resetUnsavedChanges, navigate, testId]);
 
   // Navigation
   const goToNextQuestion = useCallback(() => {

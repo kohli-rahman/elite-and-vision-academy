@@ -1,6 +1,5 @@
-
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, User, Phone, BookOpen, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,15 +25,42 @@ const classOptions = [
 
 const Auth = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
   const [selectedExams, setSelectedExams] = useState<string[]>([]);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
+
+  useEffect(() => {
+    const handlePasswordReset = async () => {
+      const accessToken = searchParams.get('access_token');
+      const refreshToken = searchParams.get('refresh_token');
+      const type = searchParams.get('type');
+      
+      if (type === 'recovery' && (accessToken || refreshToken)) {
+        try {
+          const { error } = await supabase.auth.getSession();
+          
+          if (!error) {
+            setShowResetPassword(true);
+            window.history.replaceState({}, document.title, '/auth');
+          }
+        } catch (error) {
+          console.error('Error checking session for password reset:', error);
+        }
+      }
+    };
+    
+    handlePasswordReset();
+  }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +99,6 @@ const Auth = () => {
 
       if (error) throw error;
 
-      // Update profile with additional information
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
@@ -117,6 +142,33 @@ const Auth = () => {
     }
   };
 
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (newPassword !== confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.updateUser({ 
+        password: newPassword 
+      });
+      
+      if (error) throw error;
+      
+      toast.success('Password updated successfully');
+      setShowResetPassword(false);
+      setActiveTab('login');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to reset password');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const toggleExam = (exam: string) => {
     setSelectedExams(prev => 
       prev.includes(exam) 
@@ -124,6 +176,54 @@ const Auth = () => {
         : [...prev, exam]
     );
   };
+
+  if (showResetPassword) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-12">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle className="text-2xl">Reset Your Password</CardTitle>
+            <CardDescription>
+              Please enter a new password for your account
+            </CardDescription>
+          </CardHeader>
+          <form onSubmit={handlePasswordReset}>
+            <CardContent className="space-y-4">
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  type="password" 
+                  placeholder="New Password" 
+                  className="pl-9" 
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  minLength={6}
+                />
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  type="password" 
+                  placeholder="Confirm New Password" 
+                  className="pl-9" 
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  minLength={6}
+                />
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? 'Updating...' : 'Update Password'}
+              </Button>
+            </CardFooter>
+          </form>
+        </Card>
+      </div>
+    );
+  }
 
   if (showForgotPassword) {
     return (

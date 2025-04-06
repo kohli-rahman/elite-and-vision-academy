@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 
 export const useTestTimer = (
@@ -7,6 +6,11 @@ export const useTestTimer = (
 ) => {
   const [timeLeft, setTimeLeft] = useState<number | null>(initialTimeLeft);
   const timerRef = useRef<any>(null);
+  const onTimeExpiredRef = useRef(onTimeExpired);
+
+  useEffect(() => {
+    onTimeExpiredRef.current = onTimeExpired;
+  }, [onTimeExpired]);
 
   useEffect(() => {
     setTimeLeft(initialTimeLeft);
@@ -24,18 +28,23 @@ export const useTestTimer = (
         setTimeLeft(prev => {
           if (prev === null || prev <= 1) {
             clearInterval(timerRef.current);
-            onTimeExpired();
+            console.log("Timer expired, triggering submission");
+            onTimeExpiredRef.current();
             return 0;
           }
           return prev - 1;
         });
       }, 1000);
+    } else if (timeLeft === 0 && !timerRef.current) {
+      // Handle case where timeLeft is already 0 when component mounts
+      console.log("Time already expired, triggering submission");
+      onTimeExpiredRef.current();
     }
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [timeLeft, onTimeExpired]);
+  }, [timeLeft]);
 
   return { timeLeft };
 };

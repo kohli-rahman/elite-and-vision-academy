@@ -1,6 +1,8 @@
 
 import { Eraser, ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
 type QuestionCardProps = {
   currentQuestion: {
@@ -57,83 +59,83 @@ export const QuestionCard = ({
       
       <div className="mb-6">
         {currentQuestion.question_type === 'multiple_choice' && currentQuestion.options ? (
-          <div className="space-y-3">
+          <RadioGroup
+            value={currentAnswer || ""}
+            onValueChange={(value) => updateAnswer(currentQuestion.id, value)}
+            className="space-y-3"
+          >
             {currentQuestion.options.map((option, index) => (
               <div 
                 key={index}
-                className={`flex items-start p-3 border rounded-lg cursor-pointer transition-colors break-words ${
+                className={`p-3 border rounded-lg transition-colors break-words ${
                   currentAnswer === index.toString() 
                     ? 'border-primary bg-primary/5' 
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
-                onClick={() => updateAnswer(currentQuestion.id, index.toString())}
               >
-                <input 
-                  type="radio" 
-                  id={`option-${index}`}
-                  name={`question-${currentQuestion.id}`}
-                  checked={currentAnswer === index.toString()}
-                  onChange={() => updateAnswer(currentQuestion.id, index.toString())}
-                  className="mr-3 mt-1 flex-shrink-0"
-                />
-                <label 
-                  htmlFor={`option-${index}`}
-                  className="cursor-pointer flex-grow text-sm sm:text-base whitespace-pre-wrap"
-                  dangerouslySetInnerHTML={{ __html: option }}
-                >
-                </label>
+                <div className="flex items-start gap-3">
+                  <RadioGroupItem 
+                    value={index.toString()} 
+                    id={`option-${index}`}
+                    className="mt-1 flex-shrink-0"
+                  />
+                  <Label 
+                    htmlFor={`option-${index}`}
+                    className="cursor-pointer flex-grow text-sm sm:text-base whitespace-pre-wrap"
+                  >
+                    <span dangerouslySetInnerHTML={{ __html: option }}></span>
+                  </Label>
+                </div>
               </div>
             ))}
-          </div>
+          </RadioGroup>
         ) : currentQuestion.question_type === 'true_false' ? (
-          <div className="space-y-3">
+          <RadioGroup
+            value={currentAnswer || ""}
+            onValueChange={(value) => updateAnswer(currentQuestion.id, value)}
+            className="space-y-3"
+          >
             <div 
-              className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
+              className={`p-3 border rounded-lg transition-colors ${
                 currentAnswer === 'true' 
                   ? 'border-primary bg-primary/5' 
                   : 'border-gray-200 hover:border-gray-300'
               }`}
-              onClick={() => updateAnswer(currentQuestion.id, 'true')}
             >
-              <input 
-                type="radio" 
-                id="option-true"
-                name={`question-${currentQuestion.id}`}
-                checked={currentAnswer === 'true'}
-                onChange={() => updateAnswer(currentQuestion.id, 'true')}
-                className="mr-3"
-              />
-              <label 
-                htmlFor="option-true"
-                className="cursor-pointer flex-grow"
-              >
-                True
-              </label>
+              <div className="flex items-center gap-3">
+                <RadioGroupItem 
+                  value="true" 
+                  id="option-true"
+                />
+                <Label 
+                  htmlFor="option-true"
+                  className="cursor-pointer flex-grow"
+                >
+                  True
+                </Label>
+              </div>
             </div>
             <div 
-              className={`flex items-center p-3 border rounded-lg cursor-pointer transition-colors ${
+              className={`p-3 border rounded-lg transition-colors ${
                 currentAnswer === 'false' 
                   ? 'border-primary bg-primary/5' 
                   : 'border-gray-200 hover:border-gray-300'
               }`}
-              onClick={() => updateAnswer(currentQuestion.id, 'false')}
             >
-              <input 
-                type="radio" 
-                id="option-false"
-                name={`question-${currentQuestion.id}`}
-                checked={currentAnswer === 'false'}
-                onChange={() => updateAnswer(currentQuestion.id, 'false')}
-                className="mr-3"
-              />
-              <label 
-                htmlFor="option-false"
-                className="cursor-pointer flex-grow"
-              >
-                False
-              </label>
+              <div className="flex items-center gap-3">
+                <RadioGroupItem 
+                  value="false" 
+                  id="option-false"
+                />
+                <Label 
+                  htmlFor="option-false"
+                  className="cursor-pointer flex-grow"
+                >
+                  False
+                </Label>
+              </div>
             </div>
-          </div>
+          </RadioGroup>
         ) : (
           <p>Unsupported question type</p>
         )}

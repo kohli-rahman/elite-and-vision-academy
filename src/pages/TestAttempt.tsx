@@ -22,15 +22,32 @@ const TestAttempt = () => {
   
   const [user, setUser] = useState<any>(null);
   const [showNav, setShowNav] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (!data.session) {
+      try {
+        setAuthLoading(true);
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Auth error:", error);
+          navigate('/auth');
+          return;
+        }
+        
+        if (!data.session) {
+          navigate('/auth');
+          return;
+        }
+        
+        setUser(data.session.user);
+      } catch (error) {
+        console.error("Session check error:", error);
         navigate('/auth');
-        return;
+      } finally {
+        setAuthLoading(false);
       }
-      setUser(data.session.user);
     };
     
     checkSession();
@@ -46,6 +63,7 @@ const TestAttempt = () => {
     isLoading,
     unsavedChanges,
     showStudentDetailsForm,
+    error,
     setCurrentQuestion,
     updateAnswer,
     saveAllAnswers,
@@ -54,6 +72,17 @@ const TestAttempt = () => {
     goToPrevQuestion,
     completeStudentDetails
   } = useTestAttempt(id, attemptId, user?.id);
+
+  if (authLoading) {
+    return (
+      <div className="pt-16 min-h-screen section-container">
+        <div className="text-center py-12">
+          <div className="spinner mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -66,14 +95,14 @@ const TestAttempt = () => {
     );
   }
 
-  if (!test || !questions.length) {
+  if (error || !test || !questions.length) {
     return (
       <div className="pt-16 min-h-screen section-container">
         <div className="text-center py-12">
           <AlertCircle className="h-12 w-12 mx-auto text-destructive" />
           <h2 className="mt-4 text-xl font-semibold">Test Not Found</h2>
           <p className="mt-2 text-muted-foreground">
-            The test you're looking for doesn't exist or you don't have permission to access it.
+            {error || "The test you're looking for doesn't exist or you don't have permission to access it."}
           </p>
           <Button onClick={() => navigate('/tests')} className="mt-4">
             Back to Tests
@@ -105,7 +134,7 @@ const TestAttempt = () => {
 
   return (
     <div className="pt-16 min-h-screen pb-12 section-container">
-      {/* Use the MathStyles component here too for consistency */}
+      {/* MathStyles for rendering math equations properly */}
       <MathStyles />
       
       <TestHeader 

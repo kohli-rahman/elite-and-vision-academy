@@ -24,6 +24,8 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [showStudentDetailsForm, setShowStudentDetailsForm] = useState(true);
+  const [initialTimeLeft, setInitialTimeLeft] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Use the extracted utility hooks
   const { 
@@ -31,15 +33,26 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
     unsavedChanges, 
     updateAnswer, 
     resetUnsavedChanges 
-  } = useAnswerManagement([]);
+  } = useAnswerManagement(questions.map(q => ({ questionId: q.id, answer: null })));
 
   // Initialize data
   useEffect(() => {
     const fetchTestData = async () => {
-      if (!testId || !attemptId || !userId) return;
+      if (!testId || !attemptId) {
+        setError("Missing test ID or attempt ID");
+        setIsLoading(false);
+        return;
+      }
+      
+      if (!userId) {
+        // Wait for user ID to be available
+        return;
+      }
 
       try {
         setIsLoading(true);
+        setError(null);
+        
         const result = await loadTestData(testId, attemptId, userId);
         
         if (result.redirectToResults) {
@@ -68,17 +81,16 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
         setInitialTimeLeft(result.timeLeft);
         setIsLoading(false);
       } catch (error: any) {
+        console.error("Error loading test data:", error);
+        setError(`Error loading test: ${error.message}`);
+        setIsLoading(false);
         toast.error(`Error loading test: ${error.message}`);
-        navigate('/tests');
       }
     };
 
     fetchTestData();
   }, [testId, attemptId, userId, navigate, updateAnswer, resetUnsavedChanges]);
 
-  // Timer management
-  const [initialTimeLeft, setInitialTimeLeft] = useState<number | null>(null);
-  
   const handleTimeExpired = useCallback(() => {
     submitTest(true);
   }, []);
@@ -118,6 +130,7 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
       
       navigate(`/tests/${testId}/results?attemptId=${attemptId}`);
     } catch (error: any) {
+      console.error("Error submitting test:", error);
       toast.error(`Error submitting test: ${error.message}`);
       setIsSubmitting(false);
     }
@@ -151,6 +164,7 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
     isLoading,
     unsavedChanges,
     showStudentDetailsForm,
+    error,
     setCurrentQuestion,
     updateAnswer,
     saveAllAnswers,

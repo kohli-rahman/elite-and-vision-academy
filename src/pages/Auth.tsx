@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Phone, BookOpen } from 'lucide-react';
+import { Mail, Lock, User, Phone, BookOpen, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
@@ -33,6 +33,8 @@ const Auth = () => {
   const [phone, setPhone] = useState('');
   const [selectedClass, setSelectedClass] = useState('');
   const [selectedExams, setSelectedExams] = useState<string[]>([]);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [activeTab, setActiveTab] = useState('login');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,6 +97,26 @@ const Auth = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+
+      if (error) throw error;
+      toast.success('Password reset link sent to your email');
+      setShowForgotPassword(false);
+      setActiveTab('login');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send reset password email');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const toggleExam = (exam: string) => {
     setSelectedExams(prev => 
       prev.includes(exam) 
@@ -103,9 +125,54 @@ const Auth = () => {
     );
   };
 
+  if (showForgotPassword) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-12">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <div className="flex items-center mb-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setShowForgotPassword(false)}
+                className="p-0 mr-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <CardTitle className="text-2xl">Reset Password</CardTitle>
+            </div>
+            <CardDescription>
+              Enter your email and we'll send you a password reset link
+            </CardDescription>
+          </CardHeader>
+          <form onSubmit={handleForgotPassword}>
+            <CardContent className="space-y-4">
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  type="email" 
+                  placeholder="Email" 
+                  className="pl-9" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? 'Sending...' : 'Send Reset Link'}
+              </Button>
+            </CardFooter>
+          </form>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-12">
-      <Tabs defaultValue="login" className="w-full max-w-md">
+      <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab} className="w-full max-w-md">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="login">Login</TabsTrigger>
           <TabsTrigger value="register">Register</TabsTrigger>
@@ -146,6 +213,14 @@ const Auth = () => {
                       required
                     />
                   </div>
+                  <Button 
+                    variant="link" 
+                    className="text-xs p-0 h-auto font-normal text-right w-full"
+                    onClick={() => setShowForgotPassword(true)}
+                    type="button"
+                  >
+                    Forgot your password?
+                  </Button>
                 </div>
               </CardContent>
               <CardFooter>

@@ -65,7 +65,7 @@ const Navbar = () => {
           <div className="flex-shrink-0">
             <Link to="/" className="flex items-center">
               <span className="text-xl font-display font-bold tracking-tight text-foreground">
-                Apex<span className="text-primary">Academy</span>
+                Elite & Vision<span className="text-primary">Academy</span>
               </span>
             </Link>
           </div>

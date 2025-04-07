@@ -5,17 +5,36 @@ import { Home, BookOpen, UserPlus, ClipboardList, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 export function MobileNavigation() {
   const location = useLocation();
   const isMobile = useIsMobile();
+  const [safeAreaBottom, setSafeAreaBottom] = React.useState(0);
+  
+  React.useEffect(() => {
+    // Check if running in a Capacitor app context
+    const isNativeApp = window.Capacitor?.isNativePlatform() || false;
+    
+    if (isNativeApp) {
+      // Use a timeout to ensure the safe area values are available after initial rendering
+      setTimeout(() => {
+        const safeAreaBottom = parseInt(getComputedStyle(document.documentElement)
+          .getPropertyValue('--ion-safe-area-bottom') || '0', 10);
+        setSafeAreaBottom(safeAreaBottom || 0);
+      }, 500);
+    }
+  }, []);
   
   if (!isMobile) return null;
   
   return (
     <>
       <MobileMenu />
-      <nav className="bottom-nav">
+      <nav className={cn(
+        "bottom-nav",
+        safeAreaBottom > 0 && "pb-[env(safe-area-inset-bottom)]"
+      )}>
         <NavItem 
           to="/" 
           icon={<Home className="bottom-nav-icon" />} 

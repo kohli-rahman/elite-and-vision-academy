@@ -2,12 +2,13 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.excellenceacademy',
-  appName: 'Excellence Academy',
+  appId: 'app.lovable.apexacademy',
+  appName: 'Apex Academy',
   webDir: 'dist',
   server: {
     androidScheme: 'https',
-    cleartext: true
+    cleartext: true,
+    url: 'https://your-lovable-preview-url.lovableproject.com?forceHideBadge=true'
   },
   plugins: {
     SplashScreen: {

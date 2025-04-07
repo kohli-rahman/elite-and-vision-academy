@@ -13,11 +13,11 @@ const Footer = () => {
           <div>
             <Link to="/" className="inline-block mb-4">
               <span className="text-xl font-display font-bold tracking-tight">
-                Excellence<span className="text-primary">Academy</span>
+                Elite & Vision<span className="text-primary">Academy</span>
               </span>
             </Link>
             <p className="text-muted-foreground mb-4 text-sm">
-              Excellence Academy is dedicated to helping students achieve their full potential through personalized coaching and mentorship programs.
+              Elite & Vision Academy is dedicated to helping students achieve their full potential through personalized coaching and mentorship programs.
             </p>
             <div className="flex space-x-3">
               <a href="#" className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary hover:text-white transition-colors">
@@ -86,19 +86,19 @@ const Footer = () => {
               <li className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                 <span className="text-muted-foreground text-sm">
-                  123 Education Lane, Learning City, ED 12345
+                  PP road Buxar, near ICICI bank, Buxar 802101
                 </span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="h-5 w-5 text-primary flex-shrink-0" />
                 <span className="text-muted-foreground text-sm">
-                  +1 (555) 123-4567
+                  +91 9110112530
                 </span>
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="h-5 w-5 text-primary flex-shrink-0" />
                 <span className="text-muted-foreground text-sm">
-                  info@excellenceacademy.com
+                  elite_academy_buxar@gmail.com
                 </span>
               </li>
             </ul>

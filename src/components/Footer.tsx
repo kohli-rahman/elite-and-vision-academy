@@ -13,11 +13,11 @@ const Footer = () => {
           <div>
             <Link to="/" className="inline-block mb-4">
               <span className="text-xl font-display font-bold tracking-tight">
-                Elite & Vision<span className="text-primary">Academy</span>
+                Elite \& Vision<span className="text-primary">Academy</span>
               </span>
             </Link>
             <p className="text-muted-foreground mb-4 text-sm">
-              Elite & Vision Academy is dedicated to helping students achieve their full potential through personalized coaching and mentorship programs.
+              Elite \& Vision Academy is dedicated to helping students achieve their full potential through personalized coaching and mentorship programs.
             </p>
             <div className="flex space-x-3">
               <a href="#" className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary hover:text-white transition-colors">

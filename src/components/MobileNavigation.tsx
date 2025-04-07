@@ -7,6 +7,15 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
+// Add Capacitor type definition
+declare global {
+  interface Window {
+    Capacitor?: {
+      isNativePlatform: () => boolean;
+    };
+  }
+}
+
 export function MobileNavigation() {
   const location = useLocation();
   const isMobile = useIsMobile();

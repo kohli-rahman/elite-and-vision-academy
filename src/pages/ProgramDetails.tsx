@@ -27,10 +27,16 @@ const ProgramDetails = () => {
     return <NotFoundView />;
   }
 
+  // Set a default sessions value if it's missing
+  const programWithSessions = {
+    ...program,
+    sessions: program.sessions || '3 sessions per week'
+  };
+
   return (
     <div className="min-h-screen pt-16">
       {/* Hero Section */}
-      <ProgramHero program={program} />
+      <ProgramHero program={programWithSessions} />
 
       {/* Program Details */}
       <section className="py-20 bg-white">
@@ -38,23 +44,23 @@ const ProgramDetails = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="lg:col-span-2">
               {/* Program Overview */}
-              <ProgramOverview program={program} />
+              <ProgramOverview program={programWithSessions} />
               
               {/* Exam Information */}
-              <ExamInformation examInfo={program.examInfo} />
+              <ExamInformation examInfo={programWithSessions.examInfo} />
               
               {/* Subjects */}
-              <SubjectsTopics subjects={program.subjects} />
+              <SubjectsTopics subjects={programWithSessions.subjects} />
               
               {/* Curriculum */}
-              <Curriculum curriculum={program.curriculum} />
+              <Curriculum curriculum={programWithSessions.curriculum} />
               
               {/* Benefits */}
-              <Benefits benefits={program.benefits} />
+              <Benefits benefits={programWithSessions.benefits} />
             </div>
             
             <div>
-              <EnrollmentSidebar programTitle={program.title} />
+              <EnrollmentSidebar programTitle={programWithSessions.title} />
             </div>
           </div>
         </div>

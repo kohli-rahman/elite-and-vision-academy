@@ -38,10 +38,10 @@ const Hero = () => {
       <div className="section-container pt-24 md:pt-32 flex flex-col md:flex-row items-center">
         <div className={`md:w-1/2 mb-12 md:mb-0 ${isLoaded ? 'animate-slide-in' : 'opacity-0'}`} style={{ animationDelay: '0.1s' }}>
           <div className="inline-flex items-center rounded-full px-3 py-1 text-sm font-medium bg-primary/10 text-primary mb-6">
-            <span className="animate-pulse-subtle">Admissions Open 2023-24</span>
+            <span className="animate-pulse-subtle">Admissions Open 2025-26</span>
           </div>
           <h1 className="heading-xl mb-6 text-balance">
-            Unlock Your <span className="text-primary">Academic Potential</span> with Apex Academy
+            Unlock Your <span className="text-primary">Academic Potential</span> with Elite & Vision Academy
           </h1>
           <p className="text-lg text-muted-foreground mb-8 max-w-lg">
             Expert coaching for CBSE, ICSE Board Exams and competitive exams like 

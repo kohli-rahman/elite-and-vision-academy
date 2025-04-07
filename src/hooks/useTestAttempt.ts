@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -135,6 +136,7 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
         toast.success('Test submitted successfully!');
       }
       
+      // Navigate to results page
       navigate(`/tests/${testId}/results?attemptId=${attemptId}`);
     } catch (error: any) {
       console.error("Error submitting test:", error);

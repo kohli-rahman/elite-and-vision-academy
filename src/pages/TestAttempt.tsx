@@ -1,4 +1,3 @@
-
 import { useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState } from 'react';
@@ -134,7 +133,6 @@ const TestAttempt = () => {
 
   return (
     <div className="pt-16 min-h-screen pb-12 section-container">
-      {/* MathStyles for rendering math equations properly */}
       <MathStyles />
       
       <TestHeader 

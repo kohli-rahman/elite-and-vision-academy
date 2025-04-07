@@ -304,7 +304,7 @@ const Index = () => {
                   <div>
                     <h3 className="font-medium mb-1">Visit Our Center</h3>
                     <p className="text-sm text-muted-foreground">
-                     PP road, Near ICICI bank,Buxar, Bihar, 802101
+                      PP road, near ICICI bank, Buxar, Bihar, 802101
                     </p>
                   </div>
                 </div>

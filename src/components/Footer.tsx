@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Linkedin, Mail, MapPin, Phone } from 'lucide-react';
 
@@ -86,7 +85,7 @@ const Footer = () => {
               <li className="flex items-start gap-3">
                 <MapPin className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                 <span className="text-muted-foreground text-sm">
-                  PP road Buxar, near ICICI bank, Buxar 802101
+                  PP road, near ICICI bank, Buxar, Bihar, 802101
                 </span>
               </li>
               <li className="flex items-center gap-3">

@@ -15,7 +15,7 @@ const About = () => {
             <span className="text-sm font-medium text-primary uppercase tracking-wider">About Us</span>
             <h1 className="heading-lg mt-2 mb-6">Our Story & Mission</h1>
             <p className="text-lg text-muted-foreground">
-              Excellence Academy was founded with a simple yet powerful vision: to provide exceptional coaching that transforms lives and unlocks potential.
+              Elite & Vision Academy was founded with a simple yet powerful vision: to provide exceptional coaching that transforms lives and unlocks potential.
             </p>
           </div>
         </div>
@@ -29,7 +29,7 @@ const About = () => {
               <span className="text-sm font-medium text-primary uppercase tracking-wider">Our Mission</span>
               <h2 className="heading-md mt-2 mb-4">Empowering Through Education</h2>
               <p className="text-muted-foreground mb-4">
-                At Excellence Academy, our mission is to provide transformative educational experiences that empower students to achieve their full potential, both academically and personally.
+                At Elite & Vision Academy, our mission is to provide transformative educational experiences that empower students to achieve their full potential, both academically and personally.
               </p>
               <p className="text-muted-foreground mb-4">
                 We believe that every student has unique talents and abilities, and our personalized approach to coaching helps uncover and nurture these strengths. By combining academic excellence with character development, we prepare our students not just for exams, but for life.
@@ -98,7 +98,7 @@ const About = () => {
         <div className="section-container">
           <div className="text-center mb-16 max-w-3xl mx-auto">
             <span className="text-sm font-medium text-primary uppercase tracking-wider">Our History</span>
-            <h2 className="heading-lg mt-2 mb-4">The Excellence Academy Journey</h2>
+            <h2 className="heading-lg mt-2 mb-4">The Elite & Vision Academy Journey</h2>
             <p className="text-muted-foreground">
               From humble beginnings to becoming a leading coaching institute, our journey has been defined by a commitment to educational excellence.
             </p>
@@ -112,7 +112,7 @@ const About = () => {
               <div className="md:col-span-4 glass-card p-6 rounded-xl animate-fade-in">
                 <h3 className="text-xl font-semibold mb-2">The Beginning</h3>
                 <p className="text-muted-foreground">
-                  Excellence Academy was founded by Dr. James Wilson with a small team of dedicated educators. Starting with just two classrooms and a handful of students, we focused on providing personalized academic coaching.
+                  Elite & Vision Academy was founded by Sanjay Sir and Abhishek Sir with a small team of dedicated educators. Starting with just two classrooms and a handful of students, we focused on providing personalized academic coaching.
                 </p>
               </div>
             </div>
@@ -148,7 +148,7 @@ const About = () => {
               <div className="md:col-span-4 glass-card p-6 rounded-xl animate-fade-in">
                 <h3 className="text-xl font-semibold mb-2">Present & Future</h3>
                 <p className="text-muted-foreground">
-                  Today, Excellence Academy stands as a premier coaching institute with a proven track record of success. We continue to evolve and adapt to meet the changing needs of students, while staying true to our core mission of empowering through education.
+                  Today, Elite & Vision Academy stands as a premier coaching institute with a proven track record of success. We continue to evolve and adapt to meet the changing needs of students, while staying true to our core mission of empowering through education.
                 </p>
               </div>
             </div>
@@ -160,7 +160,7 @@ const About = () => {
       <section className="py-20 bg-gradient-to-r from-primary/10 to-purple-500/10">
         <div className="section-container">
           <div className="text-center max-w-3xl mx-auto">
-            <h2 className="heading-lg mb-6">Ready to Join Excellence Academy?</h2>
+            <h2 className="heading-lg mb-6">Ready to Join Elite & Vision Academy?</h2>
             <p className="text-lg text-muted-foreground mb-8">
               Take the first step towards academic excellence and personal growth. Explore our programs and discover how we can help you achieve your goals.
             </p>

@@ -108,7 +108,7 @@ const Footer = () => {
         <div className="mt-12 pt-6 border-t border-gray-200">
           <div className="flex flex-col sm:flex-row justify-between items-center">
             <p className="text-muted-foreground text-sm">
-              © {currentYear} Excellence Academy. All rights reserved.
+              © {currentYear} Elite & Vision Academy. All rights reserved.
             </p>
             <div className="flex space-x-4 mt-4 sm:mt-0">
               <Link to="/privacy" className="text-muted-foreground hover:text-primary text-sm">

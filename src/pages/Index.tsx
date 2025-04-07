@@ -304,7 +304,7 @@ const Index = () => {
                   <div>
                     <h3 className="font-medium mb-1">Visit Our Center</h3>
                     <p className="text-sm text-muted-foreground">
-                      123 Education Lane, New Delhi, India - 110001
+                     PP road, Near ICICI bank,Buxar, Bihar, 802101
                     </p>
                   </div>
                 </div>
@@ -316,7 +316,7 @@ const Index = () => {
                   <div>
                     <h3 className="font-medium mb-1">Call Us</h3>
                     <p className="text-sm text-muted-foreground">
-                      +91 98765 43210
+                      +91 9110112530
                     </p>
                   </div>
                 </div>
@@ -328,7 +328,7 @@ const Index = () => {
                   <div>
                     <h3 className="font-medium mb-1">Email Us</h3>
                     <p className="text-sm text-muted-foreground">
-                      info@apexacademy.edu.in
+                      elite_academy_buxar@gmail.com
                     </p>
                   </div>
                 </div>

@@ -101,7 +101,7 @@ function MobileMenu() {
       </SheetTrigger>
       <SheetContent side="left" className="w-[80%] sm:max-w-sm">
         <div className="flex flex-col gap-6 py-6">
-          <h2 className="text-lg font-semibold">Excellence Academy</h2>
+          <h2 className="text-lg font-semibold">Elite & Vision Academy</h2>
           <nav className="flex flex-col gap-4">
             <Link to="/" className="text-base hover:text-primary">Home</Link>
             <Link to="/about" className="text-base hover:text-primary">About</Link>

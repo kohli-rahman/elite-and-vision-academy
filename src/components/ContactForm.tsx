@@ -80,7 +80,7 @@ const ContactForm = () => {
                   value={formState.name}
                   onChange={handleChange}
                   className="w-full px-4 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 transition-shadow"
-                  placeholder="John Doe"
+                  placeholder="Rahul Kumar"
                 />
               </div>
               
@@ -96,7 +96,7 @@ const ContactForm = () => {
                   value={formState.email}
                   onChange={handleChange}
                   className="w-full px-4 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 transition-shadow"
-                  placeholder="john@example.com"
+                  placeholder="elite_academy@gmail.com"
                 />
               </div>
             </div>
@@ -113,7 +113,7 @@ const ContactForm = () => {
                   value={formState.phone}
                   onChange={handleChange}
                   className="w-full px-4 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 transition-shadow"
-                  placeholder="+1 (555) 000-0000"
+                  placeholder="+91 85039*****"
                 />
               </div>
               

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { PlusCircle, MinusCircle, Check, Save, ArrowLeft, AlertTriangle } from 'lucide-react';
+import { PlusCircle, MinusCircle, Check, Save, ArrowLeft, AlertTriangle, SquareDot } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import MathStyles from '@/components/test-create/MathStyles';
+import FormattingTools from '@/components/test-create/FormattingTools';
 
 type QuestionType = {
   id: string;
@@ -37,6 +39,8 @@ const TestEdit = () => {
   const [questions, setQuestions] = useState<QuestionType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasAttempts, setHasAttempts] = useState(false);
+  const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
+  const [showFormatting, setShowFormatting] = useState(false);
   
   const form = useForm({
     defaultValues: {
@@ -70,7 +74,6 @@ const TestEdit = () => {
       try {
         setIsLoading(true);
         
-        // Check if this is the creator of the test
         const { data: test, error: testError } = await supabase
           .from('tests')
           .select('*')
@@ -79,10 +82,6 @@ const TestEdit = () => {
         
         if (testError) throw testError;
         
-        // In a real app, you would check if user.id === test.created_by
-        // or if user has appropriate permissions
-        
-        // Set form values
         form.reset({
           title: test.title,
           description: test.description || '',
@@ -92,7 +91,6 @@ const TestEdit = () => {
           is_published: test.is_published,
         });
         
-        // Check if test has any attempts
         const { data: attempts, error: attemptsError } = await supabase
           .from('test_attempts')
           .select('id')
@@ -103,7 +101,6 @@ const TestEdit = () => {
           setHasAttempts(true);
         }
         
-        // Load questions
         const { data: questionsData, error: questionsError } = await supabase
           .from('test_questions')
           .select('*')
@@ -147,13 +144,11 @@ const TestEdit = () => {
   };
 
   const removeQuestion = (id: string) => {
-    // If it's a new question, just remove it from state
     if (questions.find(q => q.id === id)?.isNew) {
       setQuestions(questions.filter(q => q.id !== id));
       return;
     }
     
-    // Otherwise, mark it for deletion
     setQuestions(questions.map(q => 
       q.id === id ? { ...q, isDeleted: true } : q
     ));
@@ -202,6 +197,62 @@ const TestEdit = () => {
     }));
   };
 
+  const insertTextFormat = (questionId: string, format: string) => {
+    const question = questions.find(q => q.id === questionId);
+    if (!question) return;
+    
+    let formattedText = '';
+    
+    switch (format) {
+      case 'superscript':
+        formattedText = '<sup>2</sup>';
+        break;
+      case 'subscript':
+        formattedText = '<sub>2</sub>';
+        break;
+      case 'fraction':
+        formattedText = '<div class="fraction" style="display: inline-block;"><span class="numerator">a</span><span class="denominator">b</span></div>';
+        break;
+      case 'sqrt':
+        formattedText = '<span class="math-root"><span class="math-root-symbol">√</span><span>x</span></span>';
+        break;
+      case 'cbrt':
+        formattedText = '<span class="math-root"><span class="math-root-symbol">∛</span><span>x</span></span>';
+        break;
+      case 'nthroot':
+        formattedText = '<span><sup>n</sup><span class="math-root"><span class="math-root-symbol">√</span><span>x</span></span></span>';
+        break;
+      case 'sqrtfraction':
+        formattedText = '<span class="math-root"><span class="math-root-symbol">√</span><span><div class="fraction" style="display: inline-block;"><span class="numerator">a</span><span class="denominator">b</span></div></span></span>';
+        break;
+      case 'radical':
+        formattedText = '<span class="math-root"><span class="math-root-symbol">√</span><span>a + b</span></span>';
+        break;
+      case 'vector':
+        formattedText = '<span>→</span>';
+        break;
+      case 'degree':
+        formattedText = '°';
+        break;
+      case 'pi':
+        formattedText = 'π';
+        break;
+      case 'theta':
+        formattedText = 'θ';
+        break;
+      case 'delta':
+        formattedText = 'Δ';
+        break;
+      case 'infinity':
+        formattedText = '∞';
+        break;
+    }
+    
+    const updatedText = question.question_text + formattedText;
+    updateQuestion(questionId, 'question_text', updatedText);
+    setShowFormatting(false);
+  };
+
   const onSubmit = async (formData: any) => {
     if (!id || !user) {
       toast.error('You must be logged in to update a test');
@@ -214,7 +265,6 @@ const TestEdit = () => {
       return;
     }
 
-    // Validate questions
     for (const q of activeQuestions) {
       if (!q.question_text) {
         toast.error('All questions must have text');
@@ -237,7 +287,6 @@ const TestEdit = () => {
     setIsSubmitting(true);
 
     try {
-      // Update the test
       const { error: testError } = await supabase
         .from('tests')
         .update({
@@ -253,12 +302,10 @@ const TestEdit = () => {
 
       if (testError) throw testError;
 
-      // Handle question updates
       const newQuestions = questions.filter(q => q.isNew && !q.isDeleted);
       const deletedQuestions = questions.filter(q => q.isDeleted && !q.isNew);
       const updatedQuestions = questions.filter(q => !q.isNew && !q.isDeleted);
       
-      // Add new questions
       if (newQuestions.length > 0) {
         const questionsToInsert = newQuestions.map(q => ({
           test_id: id,
@@ -276,7 +323,6 @@ const TestEdit = () => {
         if (newQuestionsError) throw newQuestionsError;
       }
       
-      // Delete questions
       if (deletedQuestions.length > 0) {
         const { error: deleteError } = await supabase
           .from('test_questions')
@@ -286,7 +332,6 @@ const TestEdit = () => {
         if (deleteError) throw deleteError;
       }
       
-      // Update existing questions
       for (const q of updatedQuestions) {
         const { error: updateError } = await supabase
           .from('test_questions')
@@ -324,8 +369,14 @@ const TestEdit = () => {
 
   const activeQuestions = questions.filter(q => !q.isDeleted);
 
+  const renderHTML = (htmlContent: string) => {
+    return { __html: htmlContent };
+  };
+
   return (
     <div className="pt-24 min-h-screen pb-12 section-container">
+      <MathStyles />
+      
       <Button
         variant="ghost"
         className="mb-6"
@@ -535,15 +586,47 @@ const TestEdit = () => {
                           
                           <div className="space-y-4">
                             <div>
-                              <Label htmlFor={`q-${question.id}-text`}>Question Text*</Label>
+                              <div className="flex justify-between items-center mb-2">
+                                <Label htmlFor={`q-${question.id}-text`}>Question Text*</Label>
+                                <div className="flex items-center gap-2">
+                                  <FormattingTools 
+                                    questionId={question.id}
+                                    showFormatting={showFormatting}
+                                    isActiveQuestion={activeQuestionId === question.id}
+                                    onOpenChange={(open) => {
+                                      setShowFormatting(open);
+                                      if (open) {
+                                        setActiveQuestionId(question.id);
+                                      }
+                                    }}
+                                    onInsertFormat={insertTextFormat}
+                                  />
+                                </div>
+                              </div>
                               <Textarea 
                                 id={`q-${question.id}-text`}
                                 value={question.question_text}
                                 onChange={(e) => updateQuestion(question.id, 'question_text', e.target.value)}
-                                placeholder="Enter your question here"
+                                placeholder="Enter your question here. Use text formatting options for mathematical expressions."
                                 className="mt-1"
                                 required
                               />
+                              
+                              {question.question_text && (
+                                <div className="mt-2 p-2 border rounded bg-muted/20">
+                                  <p className="text-sm font-medium mb-1">Preview:</p>
+                                  <div 
+                                    className="text-sm" 
+                                    dangerouslySetInnerHTML={renderHTML(question.question_text)}
+                                  ></div>
+                                </div>
+                              )}
+                              
+                              <div className="mt-1 flex gap-2 text-xs text-muted-foreground">
+                                <div className="flex items-center">
+                                  <span>Example: Energy = mc<sup>2</sup> is written as "Energy = mc<strong>&lt;sup&gt;</strong>2<strong>&lt;/sup&gt;</strong>"</span>
+                                </div>
+                              </div>
                             </div>
                             
                             <div>

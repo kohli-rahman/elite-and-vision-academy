@@ -54,7 +54,9 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
         setIsLoading(true);
         setError(null);
         
+        console.log("Fetching test data for testId:", testId, "attemptId:", attemptId, "userId:", userId);
         const result = await loadTestData(testId, attemptId, userId);
+        console.log("Test data result:", result);
         
         if (result.redirectToResults) {
           navigate(`/tests/${testId}/results?attemptId=${attemptId}`);

@@ -30,8 +30,10 @@ import {
 // Fetch all tests based on user role
 const fetchTests = async () => {
   try {
-    const { data: sessionData } = await supabase.auth.getSession();
-    const user = sessionData.session?.user;
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) {
+      console.error('Session error:', sessionError);
+    }
     
     // Fetch tests regardless of authentication status
     const { data, error } = await supabase
@@ -39,6 +41,7 @@ const fetchTests = async () => {
       .select('*, test_attempts(*)');
 
     if (error) throw error;
+    console.log('Fetched tests:', data);
     return data;
   } catch (error) {
     console.error('Error fetching tests:', error);
@@ -47,23 +50,26 @@ const fetchTests = async () => {
 };
 
 // Fetch user's attempts for a specific test
-const fetchUserAttempts = async (testId: string) => {
-  const { data: sessionData } = await supabase.auth.getSession();
-  const user = sessionData.session?.user;
-  
-  if (!user) {
+const fetchUserAttempts = async (testId: string, userId: string) => {
+  if (!userId) {
     throw new Error('User not authenticated');
   }
 
-  const { data, error } = await supabase
-    .from('test_attempts')
-    .select('*')
-    .eq('test_id', testId)
-    .eq('student_id', user.id)
-    .order('created_at', { ascending: false });
+  try {
+    const { data, error } = await supabase
+      .from('test_attempts')
+      .select('*')
+      .eq('test_id', testId)
+      .eq('student_id', userId)
+      .order('created_at', { ascending: false });
 
-  if (error) throw error;
-  return data;
+    if (error) throw error;
+    console.log('Fetched user attempts:', data);
+    return data;
+  } catch (error) {
+    console.error('Error fetching user attempts:', error);
+    throw error;
+  }
 };
 
 const Tests = () => {
@@ -74,8 +80,14 @@ const Tests = () => {
   
   useEffect(() => {
     const checkUser = async () => {
-      const { data } = await supabase.auth.getSession();
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error('Error checking user session:', error);
+        return;
+      }
+      
       const currentUser = data.session?.user || null;
+      console.log('Current user:', currentUser);
       setUser(currentUser);
       
       // Check if user is the specific admin
@@ -93,17 +105,20 @@ const Tests = () => {
   });
 
   const handleTakeTest = async (testId: string) => {
-    // Check if user is authenticated first
-    const { data } = await supabase.auth.getSession();
-    if (!data.session) {
-      toast.error('Please log in to take tests');
-      navigate('/auth');
-      return;
-    }
-    
     try {
+      // Check if user is authenticated first
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) {
+        toast.error('Please log in to take tests');
+        navigate('/auth');
+        return;
+      }
+      
+      const userId = data.session.user.id;
+      console.log('Taking test for user:', userId, 'Test ID:', testId);
+      
       // Check if user has already attempted this test
-      const attempts = await fetchUserAttempts(testId);
+      const attempts = await fetchUserAttempts(testId, userId);
       
       if (attempts && attempts.length > 0) {
         // Check if there's a completed attempt with student details
@@ -130,17 +145,19 @@ const Tests = () => {
         const inProgressAttempt = attempts.find(a => a.status === 'in_progress');
         if (inProgressAttempt) {
           // Continue in-progress attempt
+          console.log('Continuing in-progress attempt:', inProgressAttempt.id);
           navigate(`/tests/${testId}/attempt?attemptId=${inProgressAttempt.id}`);
           return;
         }
       }
       
       // Start a new attempt
+      console.log('Creating new test attempt');
       const { data: attemptData, error } = await supabase
         .from('test_attempts')
         .insert({
           test_id: testId,
-          student_id: user.id,
+          student_id: userId,
           status: 'in_progress',
           start_time: new Date().toISOString()
         })
@@ -148,12 +165,15 @@ const Tests = () => {
         .single();
       
       if (error) {
+        console.error('Error creating test attempt:', error);
         toast.error('Failed to start test: ' + error.message);
         return;
       }
       
+      console.log('New attempt created:', attemptData);
       navigate(`/tests/${testId}/attempt?attemptId=${attemptData.id}`);
     } catch (error: any) {
+      console.error('Error taking test:', error);
       toast.error('Error: ' + error.message);
     }
   };

@@ -89,14 +89,15 @@ export const evaluateAndSubmitTest = async (
     });
 
     // 2. Update the attempt with the final score
+    // Ensure all numeric values are properly converted to integers
     const { error: attemptUpdateError } = await supabase
       .from('test_attempts')
       .update({
         end_time: new Date().toISOString(),
         status: 'completed',
-        score: finalScore,
-        negative_marks: negativeMarks,
-        total_possible: totalPossible
+        score: Math.round(finalScore), // Convert to integer
+        negative_marks: Math.round(negativeMarks), // Convert to integer
+        total_possible: Math.round(totalPossible) // Convert to integer
       })
       .eq('id', attemptId);
       

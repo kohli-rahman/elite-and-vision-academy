@@ -1,3 +1,4 @@
+
 import { useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState } from 'react';
@@ -26,6 +27,7 @@ const TestAttempt = () => {
   useEffect(() => {
     const checkSession = async () => {
       try {
+        console.log("Checking session...");
         setAuthLoading(true);
         const { data, error } = await supabase.auth.getSession();
         
@@ -36,10 +38,12 @@ const TestAttempt = () => {
         }
         
         if (!data.session) {
+          console.log("No session found, redirecting to auth");
           navigate('/auth');
           return;
         }
         
+        console.log("Session found, user:", data.session.user);
         setUser(data.session.user);
       } catch (error) {
         console.error("Session check error:", error);
@@ -71,6 +75,14 @@ const TestAttempt = () => {
     goToPrevQuestion,
     completeStudentDetails
   } = useTestAttempt(id, attemptId, user?.id);
+
+  console.log("TestAttempt render state:", {
+    authLoading,
+    isLoading,
+    showStudentDetailsForm,
+    questionsCount: questions.length,
+    error
+  });
 
   if (authLoading) {
     return (

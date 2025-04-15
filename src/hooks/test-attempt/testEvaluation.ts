@@ -50,10 +50,13 @@ export const evaluateAndSubmitTest = async (
         continue;
       }
       
-      console.log(`Question ${question.id} - User answer: "${userAnswer}", Correct answer: "${questionData.correct_answer}"`);
+      const correctAnswer = String(questionData.correct_answer).trim();
+      const normalizedUserAnswer = String(userAnswer).trim();
+      
+      console.log(`Question ${question.id} - User answer: "${normalizedUserAnswer}", Correct answer: "${correctAnswer}"`);
 
       // Strict string comparison to ensure exact matches
-      const isCorrect = String(userAnswer).trim() === String(questionData.correct_answer).trim();
+      const isCorrect = normalizedUserAnswer === correctAnswer;
       console.log(`Question ${question.id} evaluated as: ${isCorrect ? 'Correct' : 'Incorrect'}`);
       
       if (isCorrect) {

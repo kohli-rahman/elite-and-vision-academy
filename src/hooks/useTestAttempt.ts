@@ -52,15 +52,16 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
       }
 
       try {
+        console.log("Starting fetchTestData with:", { testId, attemptId, userId });
         setIsLoading(true);
         setError(null);
-        setLoadingAttempted(true);
         
         console.log("Fetching test data for testId:", testId, "attemptId:", attemptId, "userId:", userId);
         const result = await loadTestData(testId, attemptId, userId);
         console.log("Test data result:", result);
         
         if (result.redirectToResults) {
+          console.log("Redirecting to results page");
           navigate(`/tests/${testId}/results?attemptId=${attemptId}`);
           return;
         }
@@ -79,22 +80,37 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
         
         // If time is up, automatically submit
         if (result.timeIsUp) {
+          console.log("Time is up, automatically submitting");
           submitTest(true);
           return;
         }
         
         setInitialTimeLeft(result.timeLeft);
+        setShowStudentDetailsForm(result.attemptData.student_name ? false : true);
+        console.log("Student details form showing:", result.attemptData.student_name ? false : true);
         setIsLoading(false);
       } catch (error: any) {
         console.error("Error loading test data:", error);
         setError(`Error loading test: ${error.message}`);
         setIsLoading(false);
         toast.error(`Error loading test: ${error.message}`);
+      } finally {
+        setLoadingAttempted(true);
       }
     };
 
     if (userId && testId && attemptId && !loadingAttempted) {
+      console.log("Conditions met, calling fetchTestData");
       fetchTestData();
+    } else if (!userId) {
+      console.log("Waiting for userId to be available before fetching test data");
+    } else {
+      console.log("Not fetching test data. Current state:", { 
+        userId, 
+        testId, 
+        attemptId, 
+        loadingAttempted 
+      });
     }
   }, [testId, attemptId, userId, navigate, updateAnswer, resetUnsavedChanges, loadingAttempted]);
 

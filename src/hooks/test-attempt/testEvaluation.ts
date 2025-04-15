@@ -26,7 +26,8 @@ export const evaluateAndSubmitTest = async (
       const userAnswer = answers.find(a => a.questionId === question.id)?.answer;
       console.log(`Evaluating question ${question.id}:`, {
         questionText: question.question_text.substring(0, 30) + "...",
-        userAnswer: userAnswer
+        userAnswer: userAnswer,
+        questionType: question.question_type
       });
       
       if (userAnswer === null || userAnswer === undefined) {
@@ -36,7 +37,7 @@ export const evaluateAndSubmitTest = async (
 
       const { data: questionData, error } = await supabase
         .from('test_questions')
-        .select('correct_answer')
+        .select('correct_answer, question_type, options')
         .eq('id', question.id)
         .single();
 
@@ -55,8 +56,37 @@ export const evaluateAndSubmitTest = async (
       
       console.log(`Question ${question.id} - User answer: "${normalizedUserAnswer}", Correct answer: "${correctAnswer}"`);
 
-      // Strict string comparison to ensure exact matches
-      const isCorrect = normalizedUserAnswer === correctAnswer;
+      // Handle multiple choice questions (indexes as answers)
+      let isCorrect = false;
+      
+      // For multiple choice questions, the user answer might be an index (0, 1, 2, 3)
+      // When the correct answer is the text of the option
+      if (question.question_type === 'multiple_choice' && question.options) {
+        if (normalizedUserAnswer === correctAnswer) {
+          // Direct match - correct
+          isCorrect = true;
+        } else if (/^\d+$/.test(normalizedUserAnswer)) {
+          // User answer is a numeric index
+          const optionIndex = parseInt(normalizedUserAnswer, 10);
+          
+          // Check if the option at this index matches the correct answer
+          if (question.options[optionIndex] && 
+              question.options[optionIndex].trim() === correctAnswer) {
+            isCorrect = true;
+          }
+          
+          // Also check if the index itself is the correct answer (some questions store index as answer)
+          if (normalizedUserAnswer === correctAnswer) {
+            isCorrect = true;
+          }
+          
+          console.log(`Multiple choice evaluation: index=${optionIndex}, option text="${question.options[optionIndex]}"`);
+        }
+      } else {
+        // For other question types, do a direct comparison
+        isCorrect = normalizedUserAnswer === correctAnswer;
+      }
+      
       console.log(`Question ${question.id} evaluated as: ${isCorrect ? 'Correct' : 'Incorrect'}`);
       
       if (isCorrect) {

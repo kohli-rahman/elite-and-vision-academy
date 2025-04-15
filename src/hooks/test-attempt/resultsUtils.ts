@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -191,23 +190,43 @@ export const downloadResults = (test: any, attempt: any, questions: Question[], 
   URL.revokeObjectURL(url);
 };
 
-export const getCorrectAnswerText = (question: Question) => {
-  if (question.question_type === 'multiple_choice' && question.options) {
-    const options = question.options;
-    const correctOption = options[parseInt(question.correct_answer)];
-    return correctOption || question.correct_answer;
+export const getCorrectAnswerText = (question: Question): string => {
+  if (!question.correct_answer && !question.options) {
+    return 'Not available';
   }
   
+  // For multiple choice questions, try to get the text of the option
+  if (question.question_type === 'multiple_choice' && question.options) {
+    // If correct_answer is a number (index), show the text of that option
+    const indexMatch = question.correct_answer.match(/^(\d+)$/);
+    if (indexMatch && question.options[parseInt(indexMatch[1], 10)]) {
+      const index = parseInt(indexMatch[1], 10);
+      return question.options[index] || question.correct_answer;
+    }
+    
+    // Otherwise just show the correct answer as is
+    return question.correct_answer;
+  }
+  
+  // For true/false questions, return "True" or "False"
+  if (question.question_type === 'true_false') {
+    return question.correct_answer === 'true' ? 'True' : 'False';
+  }
+  
+  // For any other type, just return the correct answer
   return question.correct_answer;
 };
 
-export const getQuestionResult = (questionId: string, answers: TestAnswer[]) => {
-  const answer = answers.find(a => a.question_id === questionId);
-  if (!answer) return { answered: false, isCorrect: false, answer: null };
+export const getQuestionResult = (questionId: string, answers: TestAnswer[]): {
+  answered: boolean;
+  isCorrect: boolean;
+  answer: string | null;
+} => {
+  const userAnswer = answers.find(a => a.question_id === questionId);
   
   return {
-    answered: answer.student_answer !== null,
-    isCorrect: answer.is_correct === true,
-    answer: answer.student_answer
+    answered: !!userAnswer && userAnswer.student_answer !== null,
+    isCorrect: !!userAnswer && userAnswer.is_correct === true,
+    answer: userAnswer ? userAnswer.student_answer : null
   };
 };

@@ -1,4 +1,3 @@
-
 import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -77,7 +76,37 @@ const TestResults = () => {
     loadResults();
   }, [id, attemptId, isAdmin]);
 
-  // Memoize calculated values to avoid recalculating on each render
+  const getQuestionResult = (questionId: string, answers: TestAnswer[]): {
+    answered: boolean;
+    isCorrect: boolean;
+    answer: string | null;
+  } => {
+    const userAnswer = answers.find(a => a.question_id === questionId);
+    
+    return {
+      answered: !!userAnswer && userAnswer.student_answer !== null,
+      isCorrect: !!userAnswer && userAnswer.is_correct === true,
+      answer: userAnswer ? userAnswer.student_answer : null
+    };
+  };
+
+  const getAnswerText = (question: Question, answerValue: string | null): string => {
+    if (answerValue === null) return 'Not answered';
+    
+    if (question.question_type === 'multiple_choice' && question.options && /^\d+$/.test(answerValue)) {
+      const index = parseInt(answerValue, 10);
+      if (question.options[index]) {
+        return question.options[index];
+      }
+    }
+    
+    if (question.question_type === 'true_false') {
+      return answerValue === 'true' ? 'True' : 'False';
+    }
+    
+    return answerValue;
+  };
+
   const score = useMemo(() => {
     if (!attempt) return { score: 0, total: 0, percentage: 0, negativeMark: 0 };
     
@@ -143,7 +172,6 @@ const TestResults = () => {
     );
   }
   
-  // If admin and no specific attempt is being viewed, show the student attempts table
   if (isAdmin && !attemptId) {
     return (
       <div className="pt-24 min-h-screen pb-12 section-container">
@@ -211,7 +239,6 @@ const TestResults = () => {
             </div>
           )}
           
-          {/* Score Distribution Chart - Only render if there's data */}
           {studentAttempts.length > 0 && (
             <div className="mt-8">
               <h3 className="font-medium mb-4">Score Distribution</h3>
@@ -243,7 +270,6 @@ const TestResults = () => {
     );
   }
   
-  // Display individual attempt details
   return (
     <div className="pt-24 min-h-screen pb-12 section-container">
       <div className="mb-6">
@@ -322,7 +348,6 @@ const TestResults = () => {
         </div>
       </div>
       
-      {/* Detailed Question Analysis - Render lazily with pagination if there are many questions */}
       <div className="glass-card p-8 rounded-lg mb-8">
         <h2 className="text-xl font-semibold mb-6">Question Analysis</h2>
         
@@ -378,7 +403,7 @@ const TestResults = () => {
                     <div>
                       <span className="font-medium">Your answer:</span> 
                       <span className="ml-2">
-                        {answered ? answer : 'Not answered'}
+                        {answered ? getAnswerText(question, answer) : 'Not answered'}
                       </span>
                     </div>
                     <div>

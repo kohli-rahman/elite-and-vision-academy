@@ -126,7 +126,7 @@ export const loadTestData = async (testId: string, attemptId: string | null, use
     }));
 
     // 4. Initialize and load existing answers
-    const initialAnswers = questionsData.map((q: any) => ({
+    const initialAnswers = formattedQuestions.map((q: any) => ({
       questionId: q.id,
       answer: null,
     }));

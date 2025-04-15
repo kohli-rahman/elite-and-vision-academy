@@ -27,6 +27,7 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
   const [initialTimeLeft, setInitialTimeLeft] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [autoSubmitTriggered, setAutoSubmitTriggered] = useState(false);
+  const [loadingAttempted, setLoadingAttempted] = useState(false);
 
   // Use the extracted utility hooks
   const { 
@@ -53,6 +54,7 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
       try {
         setIsLoading(true);
         setError(null);
+        setLoadingAttempted(true);
         
         console.log("Fetching test data for testId:", testId, "attemptId:", attemptId, "userId:", userId);
         const result = await loadTestData(testId, attemptId, userId);
@@ -91,8 +93,10 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
       }
     };
 
-    fetchTestData();
-  }, [testId, attemptId, userId, navigate, updateAnswer, resetUnsavedChanges]);
+    if (userId && testId && attemptId && !loadingAttempted) {
+      fetchTestData();
+    }
+  }, [testId, attemptId, userId, navigate, updateAnswer, resetUnsavedChanges, loadingAttempted]);
 
   const handleTimeExpired = useCallback(() => {
     console.log("Time expired callback triggered");

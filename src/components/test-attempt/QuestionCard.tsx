@@ -42,6 +42,11 @@ export const QuestionCard = ({
       submitTest();
     }
   };
+  
+  const handleAnswerChange = (value: string) => {
+    console.log(`Setting answer for question ${currentQuestion.id} to:`, value);
+    updateAnswer(currentQuestion.id, value);
+  };
 
   return (
     <div className="glass-card p-4 sm:p-6 rounded-lg w-full overflow-x-hidden">
@@ -61,7 +66,7 @@ export const QuestionCard = ({
         {currentQuestion.question_type === 'multiple_choice' && currentQuestion.options ? (
           <RadioGroup
             value={currentAnswer || ""}
-            onValueChange={(value) => updateAnswer(currentQuestion.id, value)}
+            onValueChange={handleAnswerChange}
             className="space-y-3"
           >
             {currentQuestion.options.map((option, index) => (
@@ -92,7 +97,7 @@ export const QuestionCard = ({
         ) : currentQuestion.question_type === 'true_false' ? (
           <RadioGroup
             value={currentAnswer || ""}
-            onValueChange={(value) => updateAnswer(currentQuestion.id, value)}
+            onValueChange={handleAnswerChange}
             className="space-y-3"
           >
             <div 

@@ -102,7 +102,7 @@ const Navbar = () => {
                       </div>
                       <div className="flex items-center space-x-3">
                         <Mail className="h-5 w-5 text-primary flex-shrink-0" />
-                        <span className="text-muted-foreground">elite_academy_buxar@gmail.com</span>
+                        <span className="text-muted-foreground">elitevision.buxar@gmail.com</span>
                       </div>
                       <div className="flex items-start space-x-3">
                         <MapPin className="h-5 w-5 text-primary flex-shrink-0 mt-1" />

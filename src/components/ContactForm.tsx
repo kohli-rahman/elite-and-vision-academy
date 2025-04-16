@@ -96,7 +96,7 @@ const ContactForm = () => {
                   value={formState.email}
                   onChange={handleChange}
                   className="w-full px-4 py-2 rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 transition-shadow"
-                  placeholder="elite_academy_buxar@gmail.com"
+                  placeholder="elitevision.buxar@gmail.com"
                 />
               </div>
             </div>

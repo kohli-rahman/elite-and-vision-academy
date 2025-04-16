@@ -1,9 +1,11 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, BookOpen } from 'lucide-react';
+import { Menu, X, BookOpen, Phone, Mail, MapPin } from 'lucide-react';
 import AuthStatus from './AuthStatus';
 import { supabase } from '@/integrations/supabase/client';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -46,8 +48,12 @@ const Navbar = () => {
     { name: 'Home', path: '/' },
     { name: 'Programs', path: '/programs' },
     { name: 'About Us', path: '/about' },
-    { name: 'Contact', path: '/contact' },
-    { name: 'Tests', path: '/tests' }, // Make Tests visible to all users
+    { 
+      name: 'Contact', 
+      path: '/contact',
+      icon: <Phone className="mr-2 h-4 w-4" /> 
+    },
+    { name: 'Tests', path: '/tests' },
   ];
 
   const isActive = (path: string) => {
@@ -72,17 +78,54 @@ const Navbar = () => {
           
           <nav className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                to={link.path}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  isActive(link.path) 
-                    ? 'text-primary' 
-                    : 'text-foreground/80'
-                }`}
-              >
-                {link.name}
-              </Link>
+              link.name === 'Contact' ? (
+                <Popover key={link.name}>
+                  <PopoverTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      className={`text-sm font-medium transition-colors hover:text-primary ${
+                        isActive(link.path) 
+                          ? 'text-primary' 
+                          : 'text-foreground/80'
+                      }`}
+                    >
+                      {link.icon}
+                      {link.name}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-4 bg-white shadow-lg rounded-lg">
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold mb-2">Contact Details</h3>
+                      <div className="flex items-center space-x-3">
+                        <Phone className="h-5 w-5 text-primary flex-shrink-0" />
+                        <span className="text-muted-foreground">+91 9110112530</span>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Mail className="h-5 w-5 text-primary flex-shrink-0" />
+                        <span className="text-muted-foreground">elite_academy_buxar@gmail.com</span>
+                      </div>
+                      <div className="flex items-start space-x-3">
+                        <MapPin className="h-5 w-5 text-primary flex-shrink-0 mt-1" />
+                        <span className="text-muted-foreground">
+                          PP road, near ICICI bank, Buxar, Bihar, 802101
+                        </span>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              ) : (
+                <Link
+                  key={link.name}
+                  to={link.path}
+                  className={`text-sm font-medium transition-colors hover:text-primary ${
+                    isActive(link.path) 
+                      ? 'text-primary' 
+                      : 'text-foreground/80'
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              )
             ))}
             <AuthStatus />
           </nav>

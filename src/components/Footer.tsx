@@ -25,10 +25,10 @@ const Footer = () => {
               <a href="#" className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary hover:text-white transition-colors">
                 <Twitter className="h-4 w-4" />
               </a>
-              <a href="#" className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary hover:text-white transition-colors">
+              <a href="https://www.instagram.com/elitevision.buxar/" className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary hover:text-white transition-colors">
                 <Instagram className="h-4 w-4" />
               </a>
-              <a href="#" className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary hover:text-white transition-colors">
+              <a href="https://www.linkedin.com/in/elite-academy-buxar/" className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-primary hover:text-white transition-colors">
                 <Linkedin className="h-4 w-4" />
               </a>
             </div>
@@ -97,7 +97,7 @@ const Footer = () => {
               <li className="flex items-center gap-3">
                 <Mail className="h-5 w-5 text-primary flex-shrink-0" />
                 <span className="text-muted-foreground text-sm">
-                  elite_academy_buxar@gmail.com
+                  elitevision.buxar@gmail.com
                 </span>
               </li>
             </ul>

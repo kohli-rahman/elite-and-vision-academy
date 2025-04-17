@@ -128,7 +128,7 @@ const Auth = () => {
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://elite-and-vision-academy.vercel.app/auth',
+        redirectTo: 'https://elite-and-vision-academy.vercel.app/reset-password',
 });
 
       if (error) throw error;

@@ -46,6 +46,7 @@ const App = () => {
               <Route path="/tests/:id/attempt" element={<TestAttempt />} />
               <Route path="/tests/:id/results" element={<TestResults />} />
               <Route path="/admission" element={<Admission />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>

@@ -2,7 +2,11 @@
 {
   "rewrites": [
     { "source": "/reset-password", "destination": "/" },
-    { "source": "/(.*)", "destination": "/" }
+    { "source": "/(.*)", "destination": "/" },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ]
 }
 

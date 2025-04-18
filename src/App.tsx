@@ -1,4 +1,8 @@
 import ResetPassword from './pages/reset-password';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Auth from './components/Auth';
+import ResetPasswordPage from './pages/reset-password';
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,6 +26,19 @@ import Admission from "./pages/Admission";
 import { useIsMobile } from "./hooks/use-mobile";
 
 const queryClient = new QueryClient();
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/auth"           element={<Auth />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="*"                element={<Auth />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
 
 const App = () => {
   const isMobile = useIsMobile();

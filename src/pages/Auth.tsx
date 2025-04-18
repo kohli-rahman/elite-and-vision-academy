@@ -114,7 +114,7 @@ useEffect(() => {
 
     // ④ show the reset form and stay on /reset-password
     setShowResetPassword(true);
-    window.history.replaceState({}, document.title, '/reset-password');
+    
   };
 
   handlePasswordReset();

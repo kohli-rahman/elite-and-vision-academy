@@ -1,31 +1,30 @@
-// src/pages/reset-password.tsx
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-export default function ResetPassword() {
-  const router = useNavigate();
+export default function ResetPasswordPage() {
+  const navigate = useNavigate();
   const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('Loading…');
+  const [message, setMessage]   = useState('Loading…');
   const [canReset, setCanReset] = useState(false);
 
   useEffect(() => {
     const doRecovery = async () => {
-      const hash = window.location.hash.replace(/^#/, '');
+      const hash   = window.location.hash.replace(/^#/, '');
       const params = new URLSearchParams(hash);
-      const token = params.get('access_token');
+      const token  = params.get('access_token');
 
       if (!token) {
-        setMessage('Invalid reset link.');
+        setMessage('Invalid or expired reset link.');
         return;
       }
 
-      const { error: verifyError } = await supabase.auth.verifyOtp({
+      const { error } = await supabase.auth.verifyOtp({
         type: 'recovery',
         token,
       });
-      if (verifyError) {
-        setMessage(verifyError.message);
+      if (error) {
+        setMessage(error.message);
         return;
       }
 
@@ -41,8 +40,8 @@ export default function ResetPassword() {
     if (error) {
       setMessage(error.message);
     } else {
-      setMessage('Password updated! Redirecting to login…');
-      setTimeout(() => router('/auth'), 3000);
+      setMessage('✅ Password updated! Redirecting to login…');
+      setTimeout(() => navigate('/auth'), 3000);
     }
   };
 
@@ -59,7 +58,10 @@ export default function ResetPassword() {
             onChange={(e) => setPassword(e.target.value)}
             className="w-full mb-4 p-2 border"
           />
-          <button onClick={handleReset} className="w-full p-2 bg-blue-600 text-white">
+          <button
+            onClick={handleReset}
+            className="w-full p-2 bg-blue-600 text-white"
+          >
             Update Password
           </button>
         </>

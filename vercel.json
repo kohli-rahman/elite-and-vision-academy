@@ -1,8 +1,5 @@
-
-  {
+{
   "rewrites": [
-    { "source": "/reset-password", "destination": "/" }
+    { "source": "/(.*)", "destination": "/" }
   ]
 }
-
-

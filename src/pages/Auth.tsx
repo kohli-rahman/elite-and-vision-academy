@@ -91,6 +91,26 @@ useEffect(() => {
       toast.error(verifyError.message);
       return;
     }
+    useEffect(() => {
+  const handlePasswordReset = async () => {
+    const hash = window.location.hash.replace(/^#/, '');
+    const params = new URLSearchParams(hash);
+    const token = params.get('access_token');
+    const type  = params.get('type');
+
+    if (type === 'recovery' && token) {
+      const { error } = await supabase.auth.verifyOtp({ type: 'recovery', token });
+      if (!error) {
+        // show your “enter new password” form
+        setShowResetPassword(true);
+        // clean up the URL so you stay on /auth
+        window.history.replaceState({}, document.title, '/auth');
+      }
+    }
+  };
+
+  handlePasswordReset();
+}, []);
 
     // ④ show the reset form and stay on /reset-password
     setShowResetPassword(true);

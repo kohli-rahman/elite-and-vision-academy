@@ -2,7 +2,7 @@
 
 ## Project info
 
-**URL**: https://elite-and-vision-academy.vercel.app/
+**URL**: elitevisionbuxar.xyz
 
 
 **Use your preferred IDE**

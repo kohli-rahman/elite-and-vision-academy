@@ -112,7 +112,7 @@ const About = () => {
               <div className="md:col-span-4 glass-card p-6 rounded-xl animate-fade-in">
                 <h3 className="text-xl font-semibold mb-2">The Beginning</h3>
                 <p className="text-muted-foreground">
-                  Elite & Vision Academy was founded by Sanjay Sir and Abhishek Sir with a small team of dedicated educators. Starting with just two classrooms and a handful of students, we focused on providing personalized academic coaching.
+                  Elite & Vision Academy was founded by Sanjay Sir(Director), Abhishek Sir(Founder) and Rahul Sir(Chairman)  with a small team of dedicated educators. Starting with just two classrooms and a handful of students, we focused on providing personalized academic coaching.
                 </p>
               </div>
             </div>

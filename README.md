@@ -2,7 +2,7 @@
 
 ## Project info
 
-**URL**: elitevisionbuxar.xyz
+**URL**: (https://elitevisionbuxar.xyz)
 
 
 **Use your preferred IDE**

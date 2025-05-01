@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, BookOpen, Users, Star, Award, MapPin, Phone, Mail } from 'lucide-react';
@@ -9,6 +8,7 @@ import ProgramCard, { ProgramType } from '@/components/ProgramCard';
 import TestimonialCard, { TestimonialType } from '@/components/TestimonialCard';
 import FacultyCard, { FacultyType } from '@/components/FacultyCard';
 import ContactForm from '@/components/ContactForm';
+import NoticeBoard from '@/components/NoticeBoard';
 
 const fetchFaculty = async () => {
   const { data, error } = await supabase
@@ -158,6 +158,13 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       <Hero />
+      
+      {/* Notice Board Section */}
+      <section className="py-10 bg-white">
+        <div className="section-container">
+          <NoticeBoard />
+        </div>
+      </section>
       
       <section className="py-20 bg-white">
         <div className="section-container">

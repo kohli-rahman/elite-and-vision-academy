@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -60,9 +61,9 @@ const NoticeForm = ({ notice, onSuccess }: NoticeFormProps) => {
         fileUrl = await uploadNoticeFile(file);
       }
 
-      // Fix: Ensure title is always included and not optional
+      // Fixed: Ensure title is always included, not optional
       const noticeData = {
-        title: data.title, // This ensures title is always passed
+        title: data.title,
         content: data.content,
         file_url: fileUrl,
         published: data.published

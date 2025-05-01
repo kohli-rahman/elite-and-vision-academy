@@ -17,7 +17,7 @@ const NoticeCard = ({ notice, className = "" }: NoticeCardProps) => {
 
   return (
     <Card className={`w-full animate-fade-in ${className}`}>
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-2 pr-16">
         <CardTitle className="text-lg">{notice.title}</CardTitle>
         <CardDescription>Posted {formattedDate}</CardDescription>
       </CardHeader>

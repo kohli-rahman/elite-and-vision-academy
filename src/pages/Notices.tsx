@@ -1,26 +1,43 @@
 
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Bell } from "lucide-react";
+import { Bell, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import NoticeCard from "@/components/NoticeCard";
 import NoticeForm from "@/components/NoticeForm";
-import { fetchNotices } from "@/services/noticeService";
+import { fetchNotices, deleteNotice } from "@/services/noticeService";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import type { Notice } from "@/types/notice";
 
 const Notices = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [noticeToDelete, setNoticeToDelete] = useState<Notice | null>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      // In a real application, you would check if the user has admin privileges
-      // For now, we'll assume any authenticated user is an admin
-      setIsAdmin(!!session);
+      if (session?.user) {
+        // Check if the user is an admin (email is the specific admin email)
+        setIsAdmin(session.user.email === '2201cs58_rahul@iitp.ac.in');
+      } else {
+        setIsAdmin(false);
+      }
     };
     
     checkSession();
@@ -34,6 +51,27 @@ const Notices = () => {
   const handleNoticeSuccess = () => {
     setDialogOpen(false);
     refetch();
+  };
+
+  const handleDeleteClick = (notice: Notice) => {
+    setNoticeToDelete(notice);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!noticeToDelete) return;
+    
+    try {
+      await deleteNotice(noticeToDelete.id);
+      toast.success("Notice deleted successfully");
+      refetch();
+    } catch (error) {
+      console.error("Error deleting notice:", error);
+      toast.error("Failed to delete notice");
+    } finally {
+      setDeleteDialogOpen(false);
+      setNoticeToDelete(null);
+    }
   };
 
   return (
@@ -67,7 +105,19 @@ const Notices = () => {
               ))
             ) : notices && notices.length > 0 ? (
               notices.map((notice) => (
-                <NoticeCard key={notice.id} notice={notice} />
+                <div key={notice.id} className="relative">
+                  <NoticeCard notice={notice} />
+                  {isAdmin && (
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      className="absolute top-4 right-4"
+                      onClick={() => handleDeleteClick(notice)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
               ))
             ) : (
               <div className="text-center py-12">
@@ -81,6 +131,21 @@ const Notices = () => {
           </div>
         </div>
       </section>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Notice</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this notice? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-destructive text-destructive-foreground">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

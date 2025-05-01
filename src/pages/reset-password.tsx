@@ -69,14 +69,14 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="max-w-md mx-auto p-6 pt-16">
-      <Card>
-        <CardHeader>
-          <CardTitle>Reset Password</CardTitle>
+      <Card className="border-educational-primary shadow-education">
+        <CardHeader className="bg-gradient-to-r from-educational-light to-white">
+          <CardTitle className="text-educational-dark">Reset Password</CardTitle>
           <CardDescription>{message}</CardDescription>
         </CardHeader>
         
         {canReset && (
-          <CardContent>
+          <CardContent className="pt-6">
             <div className="space-y-4">
               <div className="space-y-2">
                 <Input
@@ -84,7 +84,7 @@ export default function ResetPasswordPage() {
                   placeholder="New password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full"
+                  className="w-full border-educational-muted focus-visible:ring-educational-primary"
                 />
               </div>
             </div>
@@ -95,7 +95,7 @@ export default function ResetPasswordPage() {
           <CardFooter>
             <Button
               onClick={handleReset}
-              className="w-full"
+              className="w-full bg-educational-primary hover:bg-educational-primary/90"
             >
               Update Password
             </Button>

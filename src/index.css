@@ -5,7 +5,7 @@
  
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 210 40% 98%;
     --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
@@ -14,17 +14,17 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
  
-    --primary: 221.2 83.2% 53.3%;
+    --primary: 217 91% 60%;
     --primary-foreground: 210 40% 98%;
  
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 191 91% 37%;
+    --secondary-foreground: 210 40% 98%;
  
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
  
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 262 83% 58%;
+    --accent-foreground: 210 40% 98%;
  
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
@@ -33,7 +33,7 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
  
-    --radius: 0.5rem;
+    --radius: 0.75rem;
   }
  
   .dark {
@@ -46,16 +46,16 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
  
-    --primary: 217.2 91.2% 59.8%;
+    --primary: 217 91% 60%;
     --primary-foreground: 222.2 47.4% 11.2%;
  
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 191 91% 37%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
  
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
  
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 262 83% 58%;
     --accent-foreground: 210 40% 98%;
  
     --destructive: 0 62.8% 30.6%;
@@ -77,23 +77,23 @@
 }
 
 .heading-lg {
-  @apply text-3xl font-bold tracking-tight sm:text-4xl;
+  @apply text-3xl font-bold tracking-tight sm:text-4xl text-educational-dark;
 }
 
 .heading-md {
-  @apply text-2xl font-bold tracking-tight sm:text-3xl;
+  @apply text-2xl font-bold tracking-tight sm:text-3xl text-educational-dark;
 }
 
 .heading-sm {
-  @apply text-lg font-bold tracking-tight sm:text-xl;
+  @apply text-lg font-bold tracking-tight sm:text-xl text-educational-dark;
 }
 
 .btn-primary {
-  @apply inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50;
+  @apply inline-flex items-center justify-center rounded-md bg-educational-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-educational-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 transition-all duration-200 hover:shadow-md;
 }
 
 .btn-secondary {
-  @apply inline-flex items-center justify-center rounded-md bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground hover:bg-secondary/80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50;
+  @apply inline-flex items-center justify-center rounded-md bg-educational-secondary px-4 py-2 text-sm font-medium text-white hover:bg-educational-secondary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 transition-all duration-200 hover:shadow-md;
 }
 
 .section-container {
@@ -101,7 +101,7 @@
 }
 
 .glass-card {
-  @apply bg-white/80 backdrop-blur-sm border border-gray-200/50 shadow-sm;
+  @apply bg-white/90 backdrop-blur-sm border border-educational-light shadow-education rounded-xl;
 }
 
 @keyframes fadeIn {
@@ -146,7 +146,7 @@
 
 .spinner {
   @apply h-6 w-6 rounded-full border-2 border-gray-200;
-  border-top-color: theme('colors.primary.DEFAULT');
+  border-top-color: theme('colors.educational.primary');
   animation: spin 0.75s linear infinite;
 }
 
@@ -183,7 +183,7 @@
 
 /* Bottom navigation for mobile */
 .bottom-nav {
-  @apply fixed bottom-0 left-0 right-0 bg-background border-t border-border p-2 flex justify-around items-center z-40;
+  @apply fixed bottom-0 left-0 right-0 bg-white border-t border-educational-light p-2 flex justify-around items-center z-40 shadow-md;
 }
 
 .bottom-nav-item {
@@ -212,3 +212,27 @@
   @apply pb-20 md:pb-0;
 }
 
+/* Education-themed styling */
+.edu-gradient-bg {
+  @apply bg-gradient-education text-white;
+}
+
+.edu-card {
+  @apply rounded-xl bg-white border border-educational-light shadow-education hover:shadow-lg transition-all duration-300;
+}
+
+.edu-icon-container {
+  @apply h-12 w-12 rounded-full bg-educational-light flex items-center justify-center text-educational-primary;
+}
+
+.edu-badge {
+  @apply inline-flex items-center rounded-full bg-educational-light px-3 py-1 text-sm font-medium text-educational-primary;
+}
+
+.edu-header {
+  @apply bg-gradient-hero border-b border-educational-light;
+}
+
+.edu-section {
+  @apply py-16;
+}

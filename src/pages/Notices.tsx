@@ -76,21 +76,21 @@ const Notices = () => {
 
   return (
     <div className="min-h-screen pt-16">
-      <section className="py-12 bg-gradient-to-r from-gray-50 to-blue-50">
+      <section className="py-12 bg-gradient-hero">
         <div className="section-container">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
             <div>
-              <span className="text-sm font-medium text-primary uppercase tracking-wider">Stay Updated</span>
+              <span className="edu-badge mb-2">Stay Updated</span>
               <h1 className="heading-lg mt-2">Notice Board</h1>
             </div>
             {isAdmin && (
               <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button className="mt-4 md:mt-0">Add New Notice</Button>
+                  <Button className="mt-4 md:mt-0 bg-educational-primary hover:bg-educational-primary/90">Add New Notice</Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-[500px]">
+                <DialogContent className="sm:max-w-[500px] border-educational-primary">
                   <DialogHeader>
-                    <DialogTitle>Create New Notice</DialogTitle>
+                    <DialogTitle className="text-educational-dark">Create New Notice</DialogTitle>
                   </DialogHeader>
                   <NoticeForm onSuccess={handleNoticeSuccess} />
                 </DialogContent>
@@ -101,7 +101,7 @@ const Notices = () => {
           <div className="grid grid-cols-1 gap-6 mt-8">
             {isLoading ? (
               Array(3).fill(0).map((_, i) => (
-                <div key={i} className="h-32 bg-gray-100 rounded-xl animate-pulse"></div>
+                <div key={i} className="h-32 bg-white/50 rounded-xl animate-pulse"></div>
               ))
             ) : notices && notices.length > 0 ? (
               notices.map((notice) => (
@@ -120,9 +120,9 @@ const Notices = () => {
                 </div>
               ))
             ) : (
-              <div className="text-center py-12">
-                <Bell className="mx-auto h-12 w-12 text-muted-foreground opacity-20" />
-                <h3 className="mt-4 text-lg font-medium">No Notices Available</h3>
+              <div className="text-center py-12 bg-white rounded-xl shadow-education">
+                <Bell className="mx-auto h-12 w-12 text-educational-muted opacity-20" />
+                <h3 className="mt-4 text-lg font-medium text-educational-dark">No Notices Available</h3>
                 <p className="text-muted-foreground mt-2">
                   Check back later for updates and announcements.
                 </p>

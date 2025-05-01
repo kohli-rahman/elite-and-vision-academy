@@ -16,9 +16,9 @@ const NoticeCard = ({ notice, className = "" }: NoticeCardProps) => {
     : "";
 
   return (
-    <Card className={`w-full animate-fade-in ${className}`}>
-      <CardHeader className="pb-2 pr-16">
-        <CardTitle className="text-lg">{notice.title}</CardTitle>
+    <Card className={`w-full animate-fade-in border-l-4 border-l-educational-primary ${className} hover:shadow-education transition-all duration-300`}>
+      <CardHeader className="pb-2 pr-16 bg-gradient-to-r from-educational-light to-white">
+        <CardTitle className="text-lg text-educational-dark">{notice.title}</CardTitle>
         <CardDescription>Posted {formattedDate}</CardDescription>
       </CardHeader>
       <CardContent className="pb-2">
@@ -34,7 +34,7 @@ const NoticeCard = ({ notice, className = "" }: NoticeCardProps) => {
             rel="noopener noreferrer"
             className="w-full"
           >
-            <Button variant="outline" className="w-full gap-2" size="sm">
+            <Button variant="outline" className="w-full gap-2 hover:bg-educational-light hover:text-educational-primary transition-all duration-300" size="sm">
               {notice.file_url.split('/').pop()?.length > 20 
                 ? notice.file_url.split('/').pop()?.substring(0, 20) + '...' 
                 : notice.file_url.split('/').pop()}

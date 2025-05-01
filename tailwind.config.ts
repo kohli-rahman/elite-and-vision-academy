@@ -57,6 +57,18 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				educational: {
+					primary: '#2563eb',     // Rich blue
+					secondary: '#0891b2',   // Teal
+					accent: '#7c3aed',      // Purple
+					light: '#e0f2fe',       // Light blue
+					dark: '#1e3a8a',        // Dark blue
+					success: '#059669',     // Green
+					warning: '#d97706',     // Amber
+					info: '#2dd4bf',        // Teal light
+					muted: '#94a3b8',       // Slate
+					surface: '#f8fafc',     // Background variant
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -106,6 +118,15 @@ export default {
 				'slide-in': 'slide-in 0.3s ease-out forwards',
 				'slide-up': 'slide-up 0.3s ease-out forwards',
 				'pulse-subtle': 'pulse-subtle 2s infinite ease-in-out'
+			},
+			backgroundImage: {
+				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+				'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+				'gradient-education': 'linear-gradient(135deg, #2563eb 0%, #0891b2 100%)',
+				'gradient-hero': 'linear-gradient(to right, #e0f2fe 0%, #dbeafe 50%, #e0e7ff 100%)',
+			},
+			boxShadow: {
+				'education': '0 10px 15px -3px rgba(37, 99, 235, 0.1), 0 4px 6px -4px rgba(37, 99, 235, 0.05)',
 			}
 		}
 	},

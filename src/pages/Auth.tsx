@@ -127,9 +127,12 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
+      // Store email in localStorage for the reset password page
+      localStorage.setItem('resetEmail', email);
+      
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: 'https://elite-and-vision-academy.vercel.app/reset-password',
-});
+      });
 
       if (error) throw error;
       toast.success('Password reset link sent to your email');

@@ -76,6 +76,17 @@ const TestAttempt = () => {
     completeStudentDetails
   } = useTestAttempt(id, attemptId, user?.id);
 
+  // Auto-save answers periodically
+  useEffect(() => {
+    if (unsavedChanges && attemptId && !isSubmitting) {
+      const autoSaveTimer = setTimeout(() => {
+        saveAllAnswers();
+      }, 30000); // Auto-save every 30 seconds if there are unsaved changes
+      
+      return () => clearTimeout(autoSaveTimer);
+    }
+  }, [unsavedChanges, attemptId, saveAllAnswers, isSubmitting]);
+
   console.log("TestAttempt render state:", {
     authLoading,
     isLoading,

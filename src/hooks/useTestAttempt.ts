@@ -117,8 +117,11 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
   const handleTimeExpired = useCallback(() => {
     console.log("Time expired callback triggered");
     if (!autoSubmitTriggered && !isSubmitting) {
+      console.log("Auto-submission process started");
       setAutoSubmitTriggered(true);
       toast.info("Time's up! Submitting your test...");
+      
+      // Ensure we save and submit without waiting for user confirmation
       submitTest(true);
     }
   }, [autoSubmitTriggered, isSubmitting]);
@@ -141,15 +144,25 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
 
   // Submit test
   const submitTest = useCallback(async (isTimeUp = false) => {
-    if (!test || !attempt || !attemptId || isSubmitting) return;
+    if (!test || !attempt || !attemptId) return;
     
     console.log("Submitting test, isTimeUp:", isTimeUp);
+    
+    // Prevent double submission
+    if (isSubmitting) {
+      console.log("Submission already in progress, ignoring request");
+      return;
+    }
+    
     setIsSubmitting(true);
 
     try {
+      // First save all current answers
+      console.log("Saving all answers before submission");
       await saveAnswers(attemptId, answers);
       resetUnsavedChanges();
       
+      console.log("Evaluating and submitting test");
       await evaluateAndSubmitTest(attemptId, test, questions, answers);
 
       if (isTimeUp) {
@@ -159,6 +172,7 @@ export const useTestAttempt = (testId: string | undefined, attemptId: string | n
       }
       
       // Navigate to results page
+      console.log(`Redirecting to results page: /tests/${testId}/results?attemptId=${attemptId}`);
       navigate(`/tests/${testId}/results?attemptId=${attemptId}`);
     } catch (error: any) {
       console.error("Error submitting test:", error);

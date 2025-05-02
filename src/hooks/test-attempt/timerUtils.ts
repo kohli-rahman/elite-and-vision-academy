@@ -16,6 +16,11 @@ export const useTestTimer = (
 
   useEffect(() => {
     setTimeLeft(initialTimeLeft);
+    
+    // Reset the expiration flag when the timer is reinitialized with a new value
+    if (initialTimeLeft !== null && initialTimeLeft > 0) {
+      hasTriggeredExpiration.current = false;
+    }
   }, [initialTimeLeft]);
 
   useEffect(() => {

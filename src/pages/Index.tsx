@@ -9,6 +9,15 @@ import TestimonialCard, { TestimonialType } from '@/components/TestimonialCard';
 import FacultyCard, { FacultyType } from '@/components/FacultyCard';
 import ContactForm from '@/components/ContactForm';
 import NoticeBoard from '@/components/NoticeBoard';
+import ChatBot from "@/components/ChatBot";
+
+export default function HomePage() {
+  return (
+    <main>
+      <ChatBot />
+    </main>
+  );
+}
 
 const fetchFaculty = async () => {
   const { data, error } = await supabase

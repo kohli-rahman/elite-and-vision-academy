@@ -160,26 +160,6 @@ const Index = () => {
     <div className="min-h-screen">
       <Hero />
       
-      {/* Chatbot CTA */}
-      <section className="py-6 bg-primary/5">
-        <div className="section-container">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-lg bg-white shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <MessageCircle className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-medium">Have questions?</h3>
-                <p className="text-sm text-muted-foreground">Chat with our AI assistant for quick answers</p>
-              </div>
-            </div>
-            <Button asChild>
-              <Link to="/chatbot">Open AI Assistant</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-      
       {/* Notice Board Section */}
       <section className="py-10 bg-white">
         <div className="section-container">

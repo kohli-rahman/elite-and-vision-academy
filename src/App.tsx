@@ -20,7 +20,6 @@ import TestAttempt from "./pages/TestAttempt";
 import TestResults from "./pages/TestResults";
 import Admission from "./pages/Admission";
 import Notices from "./pages/Notices";
-import ChatBotPage from "./pages/ChatBot";
 import FloatingChatBot from "./components/FloatingChatBot";
 import { useIsMobile } from "./hooks/use-mobile";
 
@@ -50,7 +49,6 @@ const App = () => {
               <Route path="/tests/:id/results" element={<TestResults />} />
               <Route path="/admission" element={<Admission />} />
               <Route path="/notices" element={<Notices />} />
-              <Route path="/chatbot" element={<ChatBotPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>

@@ -6,7 +6,7 @@ const API_KEY = "AIzaSyD4KFMnyIOezL0SV2a3zyWT6f3bYdrjCmw";
 export const sendMessageToGemini = async (prompt: string) => {
   try {
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
+      "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro-latest:generateContent",
       {
         method: "POST",
         headers: {

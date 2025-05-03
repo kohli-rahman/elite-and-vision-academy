@@ -21,6 +21,7 @@ import TestResults from "./pages/TestResults";
 import Admission from "./pages/Admission";
 import Notices from "./pages/Notices";
 import ChatBotPage from "./pages/ChatBot";
+import FloatingChatBot from "./components/FloatingChatBot";
 import { useIsMobile } from "./hooks/use-mobile";
 
 const queryClient = new QueryClient();
@@ -53,6 +54,7 @@ const App = () => {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
+          <FloatingChatBot />
           <MobileNavigation />
           {!isMobile && <Footer />}
         </BrowserRouter>

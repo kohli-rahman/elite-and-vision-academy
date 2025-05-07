@@ -100,7 +100,7 @@ const Hero = () => {
             <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-purple-500/20 rounded-xl blur"></div>
             <div className="glass-card rounded-xl overflow-hidden">
               
-               <img src="https://idcgmeemtrhjknobwxik.supabase.co/storage/v1/object/public/faculty/WhatsApp%20Image%202025-05-07%20at%2014.15.36%20(1).jpeg" />
+               <img src="https://idcgmeemtrhjknobwxik.supabase.co/storage/v1/object/public/faculty/WhatsApp%20Image%202025-05-07%20at%2014.15.36%20(1).jpeg" 
 
                 alt="Students studying in a classroom" 
                 className="w-full h-auto object-cover"

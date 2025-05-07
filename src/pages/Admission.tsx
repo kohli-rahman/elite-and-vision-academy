@@ -251,10 +251,10 @@ export default function Admission() {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="academic">Academic Excellence</SelectItem>
+                            <SelectItem value="academic">Board examination</SelectItem>
                             <SelectItem value="test-prep">Test Preparation</SelectItem>
-                            <SelectItem value="career">Career Development</SelectItem>
-                            <SelectItem value="leadership">Leadership Training</SelectItem>
+                            <SelectItem value="career">JEE/NEET</SelectItem>
+                            <SelectItem value="leadership">Board exam + CUET</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

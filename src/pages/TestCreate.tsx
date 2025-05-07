@@ -87,7 +87,7 @@ const TestCreate = () => {
       question_type: 'multiple_choice',
       options: ['', '', '', ''],
       correct_answer: '',
-      marks: 1,
+      marks: 4,
     };
     
     setQuestions([...questions, newQuestion]);

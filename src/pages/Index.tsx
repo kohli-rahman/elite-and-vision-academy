@@ -337,7 +337,7 @@ const Index = () => {
                   <div>
                     <h3 className="font-medium mb-1">Email Us</h3>
                     <p className="text-sm text-muted-foreground">
-                      elite_academy_buxar@gmail.com
+                      elitevision.buxar@gmail.com
                     </p>
                   </div>
                 </div>

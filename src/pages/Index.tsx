@@ -34,6 +34,42 @@ const Index = () => {
   });
 
   const programs: ProgramType[] = [
+     {
+      id: 'board-class-9',
+      title: 'Class 9 Board Excellence',
+      description: 'Build a strong foundation for board examinations with comprehensive coverage of all subjects, regular assessments and conceptual clarity.',
+      duration: '12 Months',
+      groupSize: 'Max 60 Students',
+      level: 'Class 9',
+      image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1744&q=80',
+    },
+    {
+      id: 'board-class-10',
+      title: 'Class 10 Board Success',
+      description: 'Comprehensive preparation for 10th board exams with focus on all subjects, sample papers, previous years question practice, and exam strategies.',
+      duration: '12 Months',
+      groupSize: 'Max 60 Students',
+      level: 'Class 10',
+      image: 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80',
+    },
+    {
+      id: 'board-class-11',
+      title: 'Class 11 Board Excellence',
+      description: 'Strong academic program for Class 11 students to build conceptual clarity and prepare for board exams with regular assessments and personalized attention.',
+      duration: '12 Months',
+      groupSize: 'Max 60 Students',
+      level: 'Class 11',
+      image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1700&q=80',
+    },
+    {
+      id: 'board-class-12',
+      title: 'Class 12 Board Success',
+      description: 'Complete preparation for 12th board exams with subject expertise, exam-oriented practice, previous years analysis, and result-driven methodology.',
+      duration: '12 Months',
+      groupSize: 'Max 60 Students',
+      level: 'Class 12',
+      image: 'https://images.unsplash.com/photo-1606761568499-6d2451b23c66?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1674&q=80',
+    },
     {
       id: 'iit-jee-foundation',
       title: 'IIT-JEE Foundation',
@@ -91,42 +127,7 @@ const Index = () => {
       image: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80',
     },
     
-    {
-      id: 'board-class-9',
-      title: 'Class 9 Board Excellence',
-      description: 'Build a strong foundation for board examinations with comprehensive coverage of all subjects, regular assessments and conceptual clarity.',
-      duration: '12 Months',
-      groupSize: 'Max 60 Students',
-      level: 'Class 9',
-      image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1744&q=80',
-    },
-    {
-      id: 'board-class-10',
-      title: 'Class 10 Board Success',
-      description: 'Comprehensive preparation for 10th board exams with focus on all subjects, sample papers, previous years question practice, and exam strategies.',
-      duration: '12 Months',
-      groupSize: 'Max 60 Students',
-      level: 'Class 10',
-      image: 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80',
-    },
-    {
-      id: 'board-class-11',
-      title: 'Class 11 Board Excellence',
-      description: 'Strong academic program for Class 11 students to build conceptual clarity and prepare for board exams with regular assessments and personalized attention.',
-      duration: '12 Months',
-      groupSize: 'Max 60 Students',
-      level: 'Class 11',
-      image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1700&q=80',
-    },
-    {
-      id: 'board-class-12',
-      title: 'Class 12 Board Success',
-      description: 'Complete preparation for 12th board exams with subject expertise, exam-oriented practice, previous years analysis, and result-driven methodology.',
-      duration: '12 Months',
-      groupSize: 'Max 60 Students',
-      level: 'Class 12',
-      image: 'https://images.unsplash.com/photo-1606761568499-6d2451b23c66?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1674&q=80',
-    },
+   
   ];
 
   const testimonials: TestimonialType[] = [

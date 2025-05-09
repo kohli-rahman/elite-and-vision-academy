@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { Facebook, whatsapp, Instagram, Linkedin, Mail, MapPin, Phone } from 'lucide-react';
+import { Facebook, Whatsapp, Instagram, Linkedin, Mail, MapPin, Phone } from 'lucide-react';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -23,9 +23,16 @@ const Footer = () => {
               <a href="#" className="h-8 w-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-educational-primary hover:text-white transition-colors">
                 <Facebook className="h-4 w-4" />
               </a>
-              <a href="https://chat.whatsapp.com/KrtF4AdzCew6FJwF2qhYWE" className="h-8 w-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-educational-primary hover:text-white transition-colors">
-                <whatsapp className="h-4 w-4" />
-              </a>
+            <a
+                  href="https://chat.whatsapp.com/KrtF4AdzCew6FJwF2qhYWE"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Join our WhatsApp Group"
+                  className="h-8 w-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-educational-primary hover:text-white transition-colors"
+>
+  <Whatsapp className="h-4 w-4" />
+</a>
+
               <a href="https://www.instagram.com/the_i_vision_institute?igsh=MTd6OXhlMm01bGd1YQ==" className="h-8 w-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-educational-primary hover:text-white transition-colors">
                 <Instagram className="h-4 w-4" />
               </a>

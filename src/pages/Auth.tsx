@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Mail, Lock, User, Phone, BookOpen, ArrowLeft } from 'lucide-react';
@@ -99,6 +100,7 @@ const Auth = () => {
 
       if (error) throw error;
 
+      // Update profile information
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
@@ -111,10 +113,13 @@ const Auth = () => {
           })
           .eq('id', user.id);
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error('Error updating profile:', profileError);
+        }
       }
 
-      toast.success('Registered successfully! Please verify your email.');
+      toast.success('Registered successfully! Please check your email for verification.');
+      setActiveTab('login');
     } catch (error: any) {
       toast.error(error.message || 'Failed to register');
     } finally {
@@ -127,11 +132,8 @@ const Auth = () => {
     setIsLoading(true);
 
     try {
-      // Store email in localStorage for the reset password page
-      localStorage.setItem('resetEmail', email);
-      
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://elite-and-vision-academy.vercel.app/reset-password',
+        redirectTo: `${window.location.origin}/auth`,
       });
 
       if (error) throw error;
@@ -436,5 +438,5 @@ const Auth = () => {
     </div>
   );
 };
-//`${ //window.location.origin}/reset-password`, });
+
 export default Auth;

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Facebook, Instagram, LinkedIn, Mail, MapPin, Phone } from 'lucide-react';
+import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone } from 'lucide-react';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -42,7 +42,7 @@ const Footer = () => {
                 <Instagram className="h-4 w-4" />
               </a>
               <a href="https://www.linkedin.com/in/elite-academy-buxar/" className="h-8 w-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-educational-primary hover:text-white transition-colors">
-                <LinkedIn className="h-4 w-4" />
+                <Linkedin className="h-4 w-4" />
               </a>
             </div>
           </div>
@@ -138,4 +138,3 @@ const Footer = () => {
 };
 
 export default Footer;
-

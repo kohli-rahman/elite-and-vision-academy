@@ -1,3 +1,4 @@
+
 // Program data with detailed information for each program
 const programsData = {
   // IIT-JEE Programs
@@ -10,7 +11,7 @@ const programsData = {
       'With regular assessments and personalized feedback, we help students identify and strengthen weak areas early in their academic journey.'
     ],
     duration: '12 Months',
-    sessions: '3 sessions per week',
+    
     groupSize: 'Max 60 Students',
     level: 'Class 9-10',
     image: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80',
@@ -62,7 +63,7 @@ const programsData = {
       'With regular mock tests and detailed performance analysis, we ensure that students can identify their strengths and weaknesses, allowing for targeted improvement in specific areas.'
     ],
     duration: '12 Months',
-    sessions: '5 sessions per week',
+   
     groupSize: 'Max 60 Students',
     level: 'Class 11-12',
     image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80',
@@ -114,7 +115,7 @@ const programsData = {
       'With small batch sizes and dedicated doubt-clearing sessions, we ensure that every student receives the individual attention needed to crack one of the toughest engineering entrance exams in the world.'
     ],
     duration: '12 Months',
-    sessions: '4 sessions per week',
+    
     groupSize: 'Max 60 Students',
     level: 'Class 12 & Droppers',
     image: 'https://images.unsplash.com/photo-1532619675605-1ede6c2ed2b0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1700&q=80',
@@ -168,7 +169,7 @@ const programsData = {
       'We help students develop a deep conceptual understanding early on, making the transition to intensive NEET preparation in higher classes smoother and more effective.'
     ],
     duration: '12 Months',
-    sessions: '3 sessions per week',
+    
     groupSize: 'Max 60 Students',
     level: 'Class 9-10',
     image: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1700&q=80',
@@ -220,7 +221,7 @@ const programsData = {
       'With specialized faculty for medical entrance preparation, regular assessments, and detailed performance analysis, we ensure that students are thoroughly prepared for the competitive NEET examination.'
     ],
     duration: '12 Months',
-    sessions: '5 sessions per week',
+   
     groupSize: 'Max 60 Students',
     level: 'Class 11-12',
     image: 'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80',
@@ -274,7 +275,7 @@ const programsData = {
       'With experienced faculty and specialized study material, we ensure that students develop the analytical skills and knowledge required to succeed in this competitive scholarship examination.'
     ],
     duration: '6 Months',
-    sessions: '3 sessions per week',
+  
     groupSize: 'Max 60 Students',
     level: 'Class 10',
     image: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80',
@@ -324,7 +325,7 @@ const programsData = {
       'With regular assessments, personalized feedback, and structured study material, we ensure that students develop strong academic skills and confidence early in their high school journey.'
     ],
     duration: '12 Months',
-    sessions: '3 sessions per week',
+   
     groupSize: 'Max 60 Students',
     level: 'Class 9',
     image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1744&q=80',
@@ -380,7 +381,7 @@ const programsData = {
       "With extensive practice through sample papers, previous years' questions, and regular mock tests, we ensure that students are thoroughly prepared for this important milestone in their academic journey."
     ],
     duration: '12 Months',
-    sessions: '5 sessions per week',
+   
     groupSize: 'Max 60 Students',
     level: 'Class 10',
     image: 'https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80',
@@ -436,7 +437,7 @@ const programsData = {
       'With regular assessments, personalized attention, and exam-oriented preparation, we ensure that students not only excel in their Class 11 examinations but also build a strong foundation for Class 12 boards and competitive exams.'
     ],
     duration: '12 Months',
-    sessions: '4 sessions per week',
+   
     groupSize: 'Max 60 Students',
     level: 'Class 11',
     image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1700&q=80',
@@ -492,7 +493,7 @@ const programsData = {
       'With subject matter experts, extensive practice materials, and exam-oriented strategies, we ensure that students are fully prepared for this crucial examination that significantly impacts their higher education opportunities.'
     ],
     duration: '12 Months',
-    sessions: '5 sessions per week',
+    
     groupSize: 'Max 60 Students',
     level: 'Class 12',
     image: 'https://images.unsplash.com/photo-1606761568499-6d2451b23c66?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1674&q=80',

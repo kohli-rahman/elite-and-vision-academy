@@ -11,9 +11,11 @@ export type Question = {
 };
 
 export type TestAnswer = {
+  id: string;
   question_id: string;
   student_answer: string | null;
   is_correct: boolean | null;
+  created_at: string; // Add this field to track when the answer was saved
 };
 
 export type RankingEntry = {
@@ -74,14 +76,23 @@ export const fetchTestResultsData = async (
       results.attempt = attemptData;
       results.test = attemptData.test;
       
-      // Fetch answers for this attempt
-      const { data: answersData, error: answersError } = await supabase
+      // Fetch answers with created_at timestamp
+      let answersQuery = supabase
         .from('test_answers')
-        .select('*')
-        .eq('attempt_id', attemptId);
+        .select('id, question_id, student_answer, is_correct, created_at');
       
-      if (answersError) throw answersError;
-      results.answers = answersData;
+      if (attemptId) {
+        answersQuery = answersQuery.eq('attempt_id', attemptId);
+      } else {
+        // For admin view without specific attempt
+        answersQuery = answersQuery.in('attempt_id', studentAttempts.map(a => a.id));
+      }
+      
+      const { data: answers, error: answersError } = await answersQuery;
+      
+      if (answersError) throw new Error(`Error fetching answers: ${answersError.message}`);
+      
+      results.answers = answers;
       
       // Only fetch questions for this test if we have an attempt
       const { data: questionsData, error: questionsError } = await supabase
@@ -221,12 +232,14 @@ export const getQuestionResult = (questionId: string, answers: TestAnswer[]): {
   answered: boolean;
   isCorrect: boolean;
   answer: string | null;
+  timestamp: string | null;
 } => {
   const userAnswer = answers.find(a => a.question_id === questionId);
   
   return {
     answered: !!userAnswer && userAnswer.student_answer !== null,
     isCorrect: !!userAnswer && userAnswer.is_correct === true,
-    answer: userAnswer ? userAnswer.student_answer : null
+    answer: userAnswer ? userAnswer.student_answer : null,
+    timestamp: userAnswer ? userAnswer.created_at : null
   };
 };

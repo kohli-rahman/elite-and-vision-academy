@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { AlertCircle, ArrowLeft, Download, Trophy } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Download, Trophy, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   Table,
@@ -24,6 +24,7 @@ import {
   TestAnswer,
   RankingEntry
 } from '@/hooks/test-attempt/resultsUtils';
+import { format } from 'date-fns';
 
 const TestResults = () => {
   const { id } = useParams<{ id: string }>();
@@ -76,17 +77,30 @@ const TestResults = () => {
     loadResults();
   }, [id, attemptId, isAdmin]);
 
+  // Format the timestamp for display
+  const formatTimestamp = (timestamp: string | null) => {
+    if (!timestamp) return 'Not recorded';
+    
+    try {
+      return format(new Date(timestamp), 'MMM d, yyyy h:mm:ss a');
+    } catch (e) {
+      return 'Invalid date';
+    }
+  };
+
   const getQuestionResult = (questionId: string, answers: TestAnswer[]): {
     answered: boolean;
     isCorrect: boolean;
     answer: string | null;
+    timestamp: string | null;
   } => {
     const userAnswer = answers.find(a => a.question_id === questionId);
     
     return {
       answered: !!userAnswer && userAnswer.student_answer !== null,
       isCorrect: !!userAnswer && userAnswer.is_correct === true,
-      answer: userAnswer ? userAnswer.student_answer : null
+      answer: userAnswer ? userAnswer.student_answer : null,
+      timestamp: userAnswer ? userAnswer.timestamp : null
     };
   };
 
@@ -353,7 +367,7 @@ const TestResults = () => {
         
         <div className="space-y-8">
           {questions.map((question, index) => {
-            const { answered, isCorrect, answer } = getQuestionResult(question.id, answers);
+            const { answered, isCorrect, answer, timestamp } = getQuestionResult(question.id, answers);
             
             return (
               <div 
@@ -409,6 +423,12 @@ const TestResults = () => {
                     <div>
                       <span className="font-medium">Correct answer:</span> 
                       <span className="ml-2" dangerouslySetInnerHTML={{ __html: getCorrectAnswerText(question) }}></span>
+                    </div>
+                    
+                    {/* Add timestamp information */}
+                    <div className="flex items-center text-sm text-muted-foreground mt-2">
+                      <Clock className="h-4 w-4 mr-1" />
+                      <span>Answered at: {formatTimestamp(timestamp)}</span>
                     </div>
                   </div>
                 </div>

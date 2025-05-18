@@ -27,16 +27,17 @@ const ProgramDetails = () => {
     return <NotFoundView />;
   }
 
-  // Set a default sessions value if it's missing
-  const programWithSessions = {
+  // Set default values for any potentially missing properties
+  const programWithDefaults = {
     ...program,
-    sessions: program.sessions || '3 sessions per week'
+    // Add sessions with a default value if it doesn't exist
+    sessions: 'sessions' in program ? program.sessions : '3 sessions per week'
   };
 
   return (
     <div className="min-h-screen pt-16">
       {/* Hero Section */}
-      <ProgramHero program={programWithSessions} />
+      <ProgramHero program={programWithDefaults} />
 
       {/* Program Details */}
       <section className="py-20 bg-white">
@@ -44,23 +45,23 @@ const ProgramDetails = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="lg:col-span-2">
               {/* Program Overview */}
-              <ProgramOverview program={programWithSessions} />
+              <ProgramOverview program={programWithDefaults} />
               
               {/* Exam Information */}
-              <ExamInformation examInfo={programWithSessions.examInfo} />
+              <ExamInformation examInfo={programWithDefaults.examInfo} />
               
               {/* Subjects */}
-              <SubjectsTopics subjects={programWithSessions.subjects} />
+              <SubjectsTopics subjects={programWithDefaults.subjects} />
               
               {/* Curriculum */}
-              <Curriculum curriculum={programWithSessions.curriculum} />
+              <Curriculum curriculum={programWithDefaults.curriculum} />
               
               {/* Benefits */}
-              <Benefits benefits={programWithSessions.benefits} />
+              <Benefits benefits={programWithDefaults.benefits} />
             </div>
             
             <div>
-              <EnrollmentSidebar programTitle={programWithSessions.title} />
+              <EnrollmentSidebar programTitle={programWithDefaults.title} />
             </div>
           </div>
         </div>

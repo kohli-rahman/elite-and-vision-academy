@@ -77,18 +77,10 @@ export const fetchTestResultsData = async (
       results.test = attemptData.test;
       
       // Fetch answers with created_at timestamp
-      let answersQuery = supabase
+      const { data: answers, error: answersError } = await supabase
         .from('test_answers')
-        .select('id, question_id, student_answer, is_correct, created_at');
-      
-      if (attemptId) {
-        answersQuery = answersQuery.eq('attempt_id', attemptId);
-      } else {
-        // For admin view without specific attempt
-        answersQuery = answersQuery.in('attempt_id', studentAttempts.map(a => a.id));
-      }
-      
-      const { data: answers, error: answersError } = await answersQuery;
+        .select('id, question_id, student_answer, is_correct, created_at')
+        .eq('attempt_id', attemptId);
       
       if (answersError) throw new Error(`Error fetching answers: ${answersError.message}`);
       

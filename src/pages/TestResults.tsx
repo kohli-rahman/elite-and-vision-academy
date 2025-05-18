@@ -88,21 +88,8 @@ const TestResults = () => {
     }
   };
 
-  const getQuestionResult = (questionId: string, answers: TestAnswer[]): {
-    answered: boolean;
-    isCorrect: boolean;
-    answer: string | null;
-    timestamp: string | null;
-  } => {
-    const userAnswer = answers.find(a => a.question_id === questionId);
-    
-    return {
-      answered: !!userAnswer && userAnswer.student_answer !== null,
-      isCorrect: !!userAnswer && userAnswer.is_correct === true,
-      answer: userAnswer ? userAnswer.student_answer : null,
-      timestamp: userAnswer ? userAnswer.timestamp : null
-    };
-  };
+  // Since we're using the updated getQuestionResult from resultsUtils, 
+  // we don't need a separate function here anymore
 
   const getAnswerText = (question: Question, answerValue: string | null): string => {
     if (answerValue === null) return 'Not answered';
